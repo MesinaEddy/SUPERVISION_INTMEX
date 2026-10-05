@@ -204,15 +204,14 @@
                     </div>
                     <div class="conditional-field">
                         <label class="block text-xs text-slate-400 mb-1">¿Compra Efectiva?</label>
-                        <select id="c-compra" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                        <select id="c-compra" onchange="toggleClientFields()" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
                             <option value="SÍ">SÍ</option>
                             <option value="NO">NO</option>
                         </select>
                     </div>
-                    <div class="conditional-field">
+                    <div id="wrapper-motivo-no-compra" class="conditional-field" style="display: none;">
                         <label class="block text-xs text-amber-400 mb-1 font-bold">Motivo No Compra</label>
                         <select id="c-motivo-no-compra" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
-                            <option value="N/A">N/A (Compra Efectiva)</option>
                             <option value="Sin dinero">Sin dinero</option>
                             <option value="Con inventario">Con inventario</option>
                             <option value="No esta el encargado">No esta el encargado</option>
@@ -475,7 +474,9 @@
 
         function toggleClientFields() {
             const abierto = document.getElementById('c-abierto').value;
+            const compra = document.getElementById('c-compra').value;
             const tipoCierreWrapper = document.getElementById('wrapper-tipo-cierre');
+            const motivoNoCompraWrapper = document.getElementById('wrapper-motivo-no-compra');
             const conditionalFields = document.querySelectorAll('.conditional-field');
             const tipoCierreInput = document.getElementById('c-tipo-cierre');
 
@@ -483,11 +484,19 @@
                 tipoCierreWrapper.style.display = 'block';
                 tipoCierreInput.required = true;
                 conditionalFields.forEach(el => el.style.display = 'none');
+                motivoNoCompraWrapper.style.display = 'none';
             } else {
                 tipoCierreWrapper.style.display = 'none';
                 tipoCierreInput.required = false;
                 tipoCierreInput.value = '';
                 conditionalFields.forEach(el => el.style.display = 'block');
+                
+                // Mostrar Motivo de No Compra solo si la compra efectiva es NO
+                if (compra === 'NO') {
+                    motivoNoCompraWrapper.style.display = 'block';
+                } else {
+                    motivoNoCompraWrapper.style.display = 'none';
+                }
             }
         }
 
@@ -594,4 +603,103 @@
         const checkValues = {};
         function setCheck(idx, val) {
             checkValues[idx] = val;
-            document.getElementById(`chk-${idx}-si`).className = val === 'SÍ' ? "px-4 py-1.5 text-xs font-bold rounded bg-emerald-600 text-white" : "px-4 py-1.5 text-xs font-bold rounded bg-slate-800 text-slate-300 border border-slate-600
+            document.getElementById(`chk-${idx}-si`).className = val === 'SÍ' ? "px-4 py-1.5 text-xs font-bold rounded bg-emerald-600 text-white" : "px-4 py-1.5 text-xs font-bold rounded bg-slate-800 text-slate-300 border border-slate-600";
+            document.getElementById(`chk-${idx}-no`).className = val === 'NO' ? "px-4 py-1.5 text-xs font-bold rounded bg-red-600 text-white" : "px-4 py-1.5 text-xs font-bold rounded bg-slate-800 text-slate-300 border border-slate-600";
+        }
+        function setupCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId), ctx = canvas.getContext('2d'); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; let drawing = false;
+            canvas.width = canvas.parentElement.clientWidth; canvas.height = 120;
+            canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+            canvas.addEventListener('mousemove', (e) => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('touchstart', (e) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); });
+            canvas.addEventListener('touchmove', (e) => { if(drawing){ const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); ctx.stroke(); } e.preventDefault(); });
+            canvas.addEventListener('touchend', () => drawing = false);
+        }
+        function initSignaturePads() { setupCanvas('asesor-sig-pad'); setupCanvas('supervisor-sig-pad'); }
+        function clearSig(canvasId) { const canvas = document.getElementById(canvasId); canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); }
+
+        function initMap() {
+            map = L.map('map').setView([currentLat, currentLng], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+            updateMapMarkers();
+
+            map.on('click', function(e) {
+                if (clientBeingCorrected) {
+                    pendingNewLat = e.latlng.lat;
+                    pendingNewLng = e.latlng.lng;
+                    showFloatingConfirmButton(`¿Es correcta la ubicación de ${clientBeingCorrected.nombre}?`);
+                }
+            });
+        }
+
+        function updateMapMarkers() {
+            if(!markersLayer) return;
+            markersLayer.clearLayers();
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            history.forEach(item => {
+                if(item.lat && item.lng) {
+                    const marker = L.marker([item.lat, item.lng]);
+                    // Mostrar permanentemente el nombre del cliente y segmento en el mapa
+                    marker.bindTooltip(`<b>${item.nombre}</b><br><span style="font-size:10px; color:#38bdf8;">${item.segmento || 'Cerrado'}</span>`, {permanent: true, direction: 'top', offset: [0, -30]});
+                    marker.bindPopup(`<b>${item.nombre}</b><br>Segmento: ${item.segmento || 'N/A'}<br><button onclick="startCorrectPin('${item.id}')" class="mt-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">Corregir Ubicación</button>`);
+                    markersLayer.addLayer(marker);
+                }
+            });
+        }
+
+        function registerClient(e) {
+            e.preventDefault();
+            const editIdx = document.getElementById('edit-index').value;
+            const abierto = document.getElementById('c-abierto').value;
+            const compra = abierto === 'SÍ' ? document.getElementById('c-compra').value : 'N/A';
+            
+            const clientData = {
+                id: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].id : 'CLI_' + Date.now(),
+                abierto: abierto,
+                tipoCierre: abierto === 'NO' ? document.getElementById('c-tipo-cierre').value : 'N/A',
+                nombre: document.getElementById('c-nombre').value,
+                telefono: abierto === 'SÍ' ? document.getElementById('c-telefono').value : '',
+                recibe: abierto === 'SÍ' ? document.getElementById('c-recibe').value : '',
+                segmento: abierto === 'SÍ' ? document.getElementById('c-segmento').value : 'Cerrado',
+                impacto: abierto === 'SÍ' ? document.getElementById('c-impacto').value : 'N/A',
+                compra: compra,
+                motivoNoCompra: (abierto === 'SÍ' && compra === 'NO') ? document.getElementById('c-motivo-no-compra').value : 'N/A',
+                codigos: abierto === 'SÍ' ? document.getElementById('c-codigos').value : '',
+                notas: abierto === 'SÍ' ? document.getElementById('c-notas').value : '',
+                foto: base64Photo || (editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].foto : ''),
+                lat: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].lat : currentLat,
+                lng: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].lng : currentLng,
+                timestamp: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].timestamp : new Date().toLocaleString(),
+                checklistScore: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].checklistScore : undefined,
+                checklistDetails: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].checklistDetails : undefined,
+                asesorSig: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].asesorSig : undefined,
+                supervisorSig: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].supervisorSig : undefined
+            };
+
+            let history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            if (editIdx !== "") {
+                history[editIdx] = clientData;
+                alert('¡Registro de cliente actualizado con éxito!');
+                cancelEdit();
+            } else {
+                history.push(clientData);
+                alert('¡Cliente registrado con éxito!');
+                document.getElementById('client-form').reset();
+            }
+
+            base64Photo = '';
+            document.getElementById('foto-preview-container').classList.add('hidden');
+            toggleClientFields();
+            updateClientDropdown();
+            loadHistory();
+            switchTab('historial');
+        }
+
+        function editClient(index) {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const item = history[index];
+            if(!item) return;
+
+            document.getElementById('edit-index').value = index;
