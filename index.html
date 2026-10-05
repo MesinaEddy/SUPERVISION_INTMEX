@@ -14,14 +14,28 @@
     <style>
         #map { height: 450px; border-radius: 0.5rem; cursor: crosshair; }
         .signature-pad { border: 2px dashed #4b5563; background: #1f2937; border-radius: 0.5rem; cursor: crosshair; touch-action: none; }
+        /* Barra de navegación inferior fija para móviles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1e293b;
+            border-top: 1px solid #334155;
+            z-index: 1050;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 4px;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
         @media print {
             body { background: white !important; color: black !important; }
-            .no-print, header, nav, button { display: none !important; }
+            .no-print, header, nav, button, .bottom-nav { display: none !important; }
             .print-container { background: white !important; color: black !important; border: none !important; box-shadow: none !important; }
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-16">
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-24">
 
     <!-- Header con Logotipo e Identidad -->
     <header class="no-print bg-slate-800 border-b border-slate-700 py-3 px-6 shadow-md">
@@ -129,25 +143,10 @@
         </div>
     </section>
 
-    <!-- Navigation Tabs -->
+    <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 mt-6">
-        <div class="no-print flex border-b border-slate-700 space-x-2 overflow-x-auto">
-            <button onclick="switchTab('clientes')" id="btn-tab-clientes" class="tab-btn px-4 py-2.5 font-medium text-sm rounded-t-lg bg-blue-600 text-white transition">
-                <i class="fa-solid fa-store mr-2"></i> 2. Registro de Clientes
-            </button>
-            <button onclick="switchTab('supervision')" id="btn-tab-supervision" class="tab-btn px-4 py-2.5 font-medium text-sm rounded-t-lg bg-slate-800 text-slate-400 hover:text-white transition">
-                <i class="fa-solid fa-clipboard-check mr-2"></i> 3. Supervisión / Checklist
-            </button>
-            <button onclick="switchTab('mapa')" id="btn-tab-mapa" class="tab-btn px-4 py-2.5 font-medium text-sm rounded-t-lg bg-slate-800 text-slate-400 hover:text-white transition">
-                <i class="fa-solid fa-map-location-dot mr-2"></i> 4. Mapa Interactivo (GPS)
-            </button>
-            <button onclick="switchTab('historial')" id="btn-tab-historial" class="tab-btn px-4 py-2.5 font-medium text-sm rounded-t-lg bg-slate-800 text-slate-400 hover:text-white transition">
-                <i class="fa-solid fa-chart-line mr-2"></i> 5. Reporte Ejecutivo y Panel Gerencial
-            </button>
-        </div>
-
         <!-- TAB 2: REGISTRO DE CLIENTES -->
-        <div id="tab-clientes" class="tab-content bg-slate-800 border border-slate-700 border-t-0 rounded-b-xl p-6 shadow-xl">
+        <div id="tab-clientes" class="tab-content bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-12">
             <h2 id="form-title" class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-user-plus"></i> Alta de Cliente en Base de Datos
             </h2>
@@ -238,7 +237,7 @@
         </div>
 
         <!-- TAB 3: SUPERVISION -->
-        <div id="tab-supervision" class="tab-content hidden bg-slate-800 border border-slate-700 border-t-0 rounded-b-xl p-6 shadow-xl">
+        <div id="tab-supervision" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-12">
             <h2 class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-clipboard-list"></i> Supervisión y Evaluación
             </h2>
@@ -269,7 +268,7 @@
         </div>
 
         <!-- TAB 4: MAPA INTERACTIVO -->
-        <div id="tab-mapa" class="tab-content hidden bg-slate-800 border border-slate-700 border-t-0 rounded-b-xl p-6 shadow-xl relative">
+        <div id="tab-mapa" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-12 relative">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
                 <div>
                     <h2 class="text-lg font-semibold text-blue-400 flex items-center gap-2">
@@ -287,7 +286,7 @@
         </div>
 
         <!-- TAB 5: HISTORIAL Y REPORTE GERENCIAL -->
-        <div id="tab-historial" class="tab-content hidden bg-slate-800 border border-slate-700 border-t-0 rounded-b-xl p-6 shadow-xl print-container">
+        <div id="tab-historial" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-12 print-container">
             <!-- Botones Superiores del Panel Gerencial -->
             <div class="no-print flex flex-wrap gap-3 mb-6 bg-slate-900/80 p-3 rounded-xl border border-slate-700 items-center">
                 <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
@@ -366,6 +365,26 @@
             </div>
         </div>
     </main>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR FIJA -->
+    <nav class="bottom-nav no-print">
+        <button onclick="switchTab('clientes')" id="btn-tab-clientes" class="tab-btn flex flex-col items-center text-blue-400 transition py-1 px-3">
+            <i class="fa-solid fa-store text-lg mb-0.5"></i>
+            <span class="text-[11px] font-medium">Registro</span>
+        </button>
+        <button onclick="switchTab('supervision')" id="btn-tab-supervision" class="tab-btn flex flex-col items-center text-slate-400 hover:text-white transition py-1 px-3">
+            <i class="fa-solid fa-clipboard-check text-lg mb-0.5"></i>
+            <span class="text-[11px] font-medium">Supervisión</span>
+        </button>
+        <button onclick="switchTab('mapa')" id="btn-tab-mapa" class="tab-btn flex flex-col items-center text-slate-400 hover:text-white transition py-1 px-3">
+            <i class="fa-solid fa-map-location-dot text-lg mb-0.5"></i>
+            <span class="text-[11px] font-medium">Mapa</span>
+        </button>
+        <button onclick="switchTab('historial')" id="btn-tab-historial" class="tab-btn flex flex-col items-center text-slate-400 hover:text-white transition py-1 px-3">
+            <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
+            <span class="text-[11px] font-medium">Historial</span>
+        </button>
+    </nav>
 
     <!-- Script Principal -->
     <script>
@@ -482,10 +501,14 @@
         }
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.remove('bg-blue-600', 'text-white'); btn.classList.add('bg-slate-800', 'text-slate-400'); });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-400');
+                btn.classList.add('text-slate-400');
+            });
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`btn-tab-${tabId}`);
-            activeBtn.classList.remove('bg-slate-800', 'text-slate-400'); activeBtn.classList.add('bg-blue-600', 'text-white');
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add('text-blue-400');
             if(tabId === 'mapa' && map) { setTimeout(() => map.invalidateSize(), 200); updateMapMarkers(); }
             if(tabId === 'historial') loadHistory();
         }
@@ -804,7 +827,7 @@
             if(!btnContainer) {
                 btnContainer = document.createElement('div');
                 btnContainer.id = 'floating-confirm-container';
-                btnContainer.className = 'absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[1000] bg-slate-900 border border-amber-500 p-3 rounded-xl shadow-2xl flex items-center gap-3';
+                btnContainer.className = 'absolute bottom-16 left-1/2 transform -translate-x-1/2 z-[1000] bg-slate-900 border border-amber-500 p-3 rounded-xl shadow-2xl flex items-center gap-3';
                 document.getElementById('tab-mapa').appendChild(btnContainer);
             }
             btnContainer.innerHTML = `
