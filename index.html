@@ -190,6 +190,36 @@
                         <textarea id="c-notas" rows="2" placeholder="Observaciones adicionales..." class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200"></textarea>
                     </div>
                 </div>
+                <label for="compraEfectiva">Compra Efectiva:</label>
+                <select id="compraEfectiva" onchange="actualizarMotivo()">
+                  <option value="">-- Seleccione --</option>
+                  <option value="SI">SÍ</option>
+                  <option value="NO">NO</option>
+                </select>
+
+                <label for="motivoNoCompra">Motivo de No Compra:</label>
+                <select id="motivoNoCompra" disabled>
+                  <option value="">-- Seleccione Motivo --</option>
+                  <option value="Sin dinero">Sin dinero</option>
+                  <option value="No esta el encargado">No está el encargado</option>
+                  <option value="Con inventario">Con inventario</option>
+                </select>
+
+                <script>
+                  function actualizarMotivo() {
+                    const compra = document.getElementById('compraEfectiva').value;
+                    const motivo = document.getElementById('motivoNoCompra');
+    
+                    if (compra === 'NO') {
+                      motivo.disabled = false;
+                      motivo.required = true;
+                    } else {
+                      motivo.disabled = true;
+                      motivo.required = false;
+                      motivo.value = '';
+                    }
+                  }
+                </script>
 
                 <!-- CAMARA NATIVA OBLIGATORIA -->
                 <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg">
