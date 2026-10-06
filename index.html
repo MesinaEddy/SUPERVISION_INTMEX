@@ -4,446 +4,582 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUPERVISION INTMEX</title>
-    <!-- Leaflet CSS para el Mapa Interactivo -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --success: #10b981;
-            --danger: #ef4444;
-            --border: #334155;
-            --brand: #38bdf8;
+            --bg-main: #0b132b;
+            --bg-card: #1c2541;
+            --bg-input: #0f172a;
+            --border-color: #2a3a5e;
+            --text-primary: #ffffff;
+            --text-secondary: #8d99ae;
+            --accent-blue: #00b4d8;
+            --btn-green: #10b981;
+            --btn-red: #ef4444;
         }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             margin: 0;
             padding: 20px;
         }
-        .container {
-            max-width: 1300px;
+
+        .app-container {
+            max-width: 1100px;
             margin: 0 auto;
         }
-        .header-title {
-            color: var(--brand);
-            font-size: 2.2em;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .header-subtitle {
-            color: var(--text-muted);
-            margin-top: 0;
-            margin-bottom: 25px;
-            font-size: 1.1em;
-            border-bottom: 2px solid var(--border);
+
+        /* Encabezado */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
             padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
         }
-        h2, h3 {
-            color: var(--text-color);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-            margin-top: 0;
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
+
+        .brand-logo {
+            height: 50px;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+
+        .brand-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        /* Tarjetas de la Interfaz */
         .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-        #map {
-            height: 450px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 0;
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffffff;
         }
+
+        /* Mapa Interactivo */
+        #map {
+            height: 380px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
         .route-legend {
             display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
-        .legend-item {
+
+        .legend-tag {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
-        .legend-dot {
-            width: 14px;
-            height: 14px;
+
+        .dot {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
         }
-        /* Checklist de Sí / No */
-        .checklist-grid-container {
+
+        /* Estilos del Pin en Mapa */
+        .custom-pin-label {
+            background: rgba(11, 19, 43, 0.95);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        /* Grid del Checklist (10 Pasos) */
+        .checklist-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
         }
-        .checklist-row {
+
+        @media (max-width: 768px) {
+            .checklist-grid { grid-template-columns: 1fr; }
+        }
+
+        .step-item {
+            background: rgba(11, 19, 43, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(15, 23, 42, 0.4);
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
         }
-        .options-group {
+
+        .step-label {
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .btn-toggle-group {
             display: flex;
-            gap: 8px;
+            gap: 4px;
         }
-        .btn-option {
-            background-color: #334155;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            padding: 6px 16px;
-            border-radius: 6px;
-            cursor: pointer;
+
+        .btn-toggle {
+            background: #2a3a5e;
+            color: var(--text-secondary);
+            border: none;
+            padding: 5px 12px;
+            font-size: 0.8rem;
             font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-option.active-si {
-            background-color: var(--success);
-            color: white;
-            border-color: var(--success);
+
+        .btn-toggle.active-si {
+            background: var(--btn-green);
+            color: #ffffff;
         }
-        .btn-option.active-no {
-            background-color: var(--danger);
-            color: white;
-            border-color: var(--danger);
+
+        .btn-toggle.active-no {
+            background: var(--btn-red);
+            color: #ffffff;
         }
-        /* Métricas y Detalles de Clientes */
-        .client-card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
+
+        .comments-box {
             margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
-        .client-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-            color: var(--brand);
+
+        .comments-box textarea {
+            width: 100%;
+            height: 50px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #fff;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            resize: vertical;
         }
-        .badge-open {
-            background-color: var(--success);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-            margin-top: 15px;
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-        .metrics-grid strong {
-            color: var(--text-color);
-        }
-        /* Firmas */
-        .signatures-container {
+
+        /* Seccion de Firmas (Fiel a la Captura 3) */
+        .signatures-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        .signature-box {
-            border: 1px dashed var(--border);
+
+        .signature-card {
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            background: rgba(11, 19, 43, 0.4);
+        }
+
+        .signature-card p {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        canvas.sig-canvas {
+            background: #060a17;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 100%;
+            height: 110px;
+            cursor: crosshair;
+        }
+
+        .btn-clear {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-top: 4px;
+            text-decoration: underline;
+        }
+
+        /* Historial de Clientes (Fiel a la Captura 3) */
+        .client-card-item {
+            background: rgba(11, 19, 43, 0.6);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
-            text-align: center;
-            background: rgba(15, 23, 42, 0.5);
+            position: relative;
         }
-        canvas.sig-canvas {
-            background: #0f172a;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            cursor: crosshair;
-            width: 100%;
-            height: 130px;
-        }
-        /* Botones de Reporte */
-        .reports-bar {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-        .btn-report {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
+
+        .client-top-bar {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-            flex: 1;
-            justify-content: center;
+            gap: 10px;
+            margin-bottom: 6px;
         }
-        .btn-report:hover {
-            background-color: var(--accent-hover);
+
+        .client-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .badge-open {
+            background: #059669;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .client-details {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .photo-status {
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+            font-size: 0.75rem;
+            text-align: right;
+        }
+
+        /* Botones de Descarga de Reportes */
+        .reports-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-report-action {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn-report-action:hover { opacity: 0.9; }
+        .btn-mymaps { background-color: #2563eb; }
+        .btn-performance { background-color: #059669; }
+        .btn-executive { background-color: #7c3aed; }
+
+        /* Formato de Impresion para Reportes PDF */
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .card { border: 1px solid #ccc; background: white; color: black; box-shadow: none; }
+            .btn-report-action, .btn-clear, .btn-toggle { display: none; }
+            .step-item { border: 1px solid #eee; background: #fff; color: #000; }
+            canvas.sig-canvas { border: 1px solid #000; background: #fff; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 class="header-title">SUPERVISION INTMEX</h1>
-    <p class="header-subtitle">Panel de Control Global y Métricas de Ruta</p>
+<div class="app-container">
 
-    <!-- 1. MAPA INTERACTIVO -->
+    <!-- Encabezado con Nombre y Logo desde GitHub -->
+    <header class="app-header">
+        <div class="brand-box">
+            <!-- Pega aquí la URL directa de tu logo en GitHub -->
+            <img src="https://raw.githubusercontent.com/TuUsuario/TuRepo/main/logo.png" 
+                 alt="Logo INTMEX" 
+                 class="brand-logo"
+                 onerror="this.style.display='none'">
+            <h1 class="brand-title">SUPERVISION INTMEX</h1>
+        </div>
+    </header>
+
+    <!-- 1. MAPA INTERACTIVO CON NOMBRES Y COLOR POR RUTA -->
     <div class="card">
-        <h2>1. Mapa Interactivo de Rutas</h2>
+        <div class="card-title">📍 Mapa Interactivo de Rutas</div>
         <div class="route-legend">
-            <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div> Ruta Norte (Azul)</div>
-            <div class="legend-item"><div class="legend-dot" style="background: #10b981;"></div> Ruta Sur (Verde)</div>
-            <div class="legend-item"><div class="legend-dot" style="background: #f59e0b;"></div> Ruta Este (Naranja)</div>
-            <div class="legend-item"><div class="legend-dot" style="background: #ec4899;"></div> Ruta Oeste (Rosa)</div>
+            <div class="legend-tag"><div class="dot" style="background:#3b82f6"></div> Ruta Norte</div>
+            <div class="legend-tag"><div class="dot" style="background:#10b981"></div> Ruta Sur</div>
+            <div class="legend-tag"><div class="dot" style="background:#f59e0b"></div> Ruta Este</div>
         </div>
         <div id="map"></div>
-        <p style="font-size: 13px; color: var(--text-muted);">* Arrastra libremente cualquier pin si hay desfase de ubicación. Las coordenadas se actualizarán para tus reportes.</p>
     </div>
 
-    <!-- 2. HISTORIAL DE CLIENTES Y METRICAS -->
+    <!-- 2. EVALUACIÓN DETALLADA (CHECKLIST 10 PASOS - SI / NO DIRECTO) -->
     <div class="card">
-        <h2>2. Métricas del Cliente y Evidencias</h2>
-        <div class="client-card">
-            <div class="client-header">
-                <strong>1. Abarrotes y Miscelánea "El Punto"</strong>
-                <span class="badge-open">ESTADO: ABIERTO</span>
-            </div>
-            <div class="metrics-grid">
-                <div><strong>Teléfono de Contacto:</strong> 55 1234 5678</div>
-                <div><strong>Persona que Recibe:</strong> Juan Pérez (Encargado)</div>
-                <div><strong>Segmento de Tienda:</strong> Tipo A (Cobro, pasillos, refis, carnicería)</div>
-                <div><strong>Compra Efectiva:</strong> SÍ (Transacción exitosa)</div>
-            </div>
-            <div style="margin-top: 15px; font-size: 14px;">
-                <strong>Notas de Visita:</strong>
-                <p style="color: var(--text-muted); margin-top: 5px; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid var(--border);">Se surtió exhibición completa en zona de cajas y se acordó espacio para nueva línea de productos la próxima semana.</p>
-            </div>
-            <div style="margin-top: 15px; font-size: 14px; font-weight: bold; color: var(--brand); display: flex; align-items: center; gap: 8px;">
-                📷 Evidencia Fotográfica de Fachada: <span style="color: var(--success);">Registrada y Adjunta al Expediente</span>
-            </div>
+        <div class="card-title">☑️ Evaluación Detallada (10 Pasos de Visita)</div>
+        <div class="checklist-grid" id="checklist-grid">
+            <!-- Generado dinámicamente con botones SI / NO -->
+        </div>
+        <div class="comments-box">
+            <strong>Comentarios Generales:</strong>
+            <textarea placeholder="Sin comentarios registrados."></textarea>
         </div>
     </div>
 
-    <!-- 3. CHECKLIST DE SUPERVISIÓN (10 PASOS - SI / NO) -->
+    <!-- 3. FIRMAS DE AUTORIZACIÓN (REPLICADO DE CAPTURA 3) -->
     <div class="card">
-        <h2>3. Evaluación Detallada (Checklist 10 Pasos INTMEX)</h2>
-        <div class="checklist-grid-container" id="checklist-container">
-            <!-- Generado dinámicamente por JS -->
-        </div>
-        <div style="margin-top: 20px;">
-            <label style="font-size: 14px; font-weight: bold; color: var(--text-color);">Comentarios Generales de Supervisión:</label>
-            <textarea id="comentarios-generales" style="width: 100%; height: 80px; background: #0f172a; border: 1px solid var(--border); color: white; border-radius: 6px; padding: 10px; margin-top: 8px; font-family: inherit;" placeholder="Escribe observaciones relevantes sobre el desempeño del asesor durante esta visita..."></textarea>
-        </div>
-    </div>
-
-    <!-- 4. FIRMAS DE CONFORMIDAD -->
-    <div class="card">
-        <h2>4. Validación y Firmas de Autorización</h2>
-        <div class="signatures-container">
-            <div class="signature-box">
-                <p><strong>Firma de Conformidad del Asesor</strong></p>
+        <div class="signatures-grid">
+            <div class="signature-card">
+                <p>Firma de Conformidad del Asesor</p>
                 <canvas id="sig-asesor" class="sig-canvas"></canvas>
-                <button onclick="clearSig('asesor')" style="margin-top:8px; background:none; border:none; color:var(--text-muted); cursor:pointer; text-decoration:underline;">Limpiar Firma</button>
+                <p style="font-size:0.75rem; color:var(--text-secondary); margin: 2px 0;">Asesor</p>
+                <button class="btn-clear" onclick="clearCanvas('sig-asesor')">Limpiar Firma</button>
             </div>
-            <div class="signature-box">
-                <p><strong>Firma de Autorización del Supervisor</strong></p>
+            <div class="signature-card">
+                <p>Firma de Autorización del Supervisor</p>
                 <canvas id="sig-supervisor" class="sig-canvas"></canvas>
-                <button onclick="clearSig('supervisor')" style="margin-top:8px; background:none; border:none; color:var(--text-muted); cursor:pointer; text-decoration:underline;">Limpiar Firma</button>
+                <p style="font-size:0.75rem; color:var(--text-secondary); margin: 2px 0;">Supervisor</p>
+                <button class="btn-clear" onclick="clearCanvas('sig-supervisor')">Limpiar Firma</button>
             </div>
         </div>
     </div>
 
-    <!-- 5. REPORTES FINALES -->
+    <!-- 4. HISTORIAL DE CLIENTES Y EVIDENCIA -->
     <div class="card">
-        <h2>5. Centro de Descarga de Reportes</h2>
-        <div class="reports-bar">
-            <button class="btn-report" onclick="exportMyMaps()">🗺️ 1. Base de Datos My Maps (CSV)</button>
-            <button class="btn-report" onclick="exportPerformanceReport()">📋 2. Reporte Desempeño Asesor</button>
-            <button class="btn-report" onclick="exportExecutiveReport()">📊 3. Reporte Ejecutivo Global</button>
+        <div class="card-title">📷 Historial de Clientes y Evidencia Fotográfica de Fachada</div>
+        <div class="client-card-item">
+            <div class="client-top-bar">
+                <span class="client-title">1. Abarrotes "El Punto"</span>
+                <span class="badge-open">Abierto</span>
+            </div>
+            <div class="client-details">
+                <strong>Tel:</strong> 1234567890 &nbsp;|&nbsp; 
+                <strong>Recibe:</strong> Juan Pérez &nbsp;|&nbsp; 
+                <strong>Segmento:</strong> Tipo A: Cobro, pasillos, refis y carnicería<br>
+                <strong>Compra Efectiva:</strong> SÍ<br>
+                <em>Notas: Exhibición completa surtida.</em>
+            </div>
+            <div class="photo-status">
+                <span style="color:var(--text-secondary);">Evidencia Fachada:</span><br>
+                <span style="color:#f59e0b; font-style:italic;">Foto Registrada</span>
+            </div>
         </div>
     </div>
+
+    <!-- 5. TRES REPORTES SOLICITADOS -->
+    <div class="card">
+        <div class="card-title">📄 Centro de Reportes</div>
+        <div class="reports-container">
+            <button class="btn-report-action btn-mymaps" onclick="downloadMyMapsCSV()">
+                💾 1. Base de Datos (My Maps CSV)
+            </button>
+            <button class="btn-report-action btn-performance" onclick="generatePerformanceReport()">
+                📋 2. Reporte Desempeño Asesor (PDF)
+            </button>
+            <button class="btn-report-action btn-executive" onclick="generateExecutiveReport()">
+                📊 3. Reporte Ejecutivo Global (PDF)
+            </button>
+        </div>
+    </div>
+
 </div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- MAPA INTERACTIVO CON RUTAS Y COLORES ---
+    // --- 1. CONFIGURACIÓN DEL MAPA INTERACTIVO ---
     const map = L.map('map').setView([19.4326, -99.1332], 14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap - SUPERVISION INTMEX'
+        maxZoom: 19
     }).addTo(map);
 
-    const clientesRuta = [
+    // Clientes con colores asignados por ruta
+    const clientes = [
         { id: 1, name: "Abarrotes El Punto", lat: 19.4350, lng: -99.1350, ruta: "Norte", color: "#3b82f6" },
         { id: 2, name: "Minisuper Don Juan", lat: 19.4300, lng: -99.1300, ruta: "Sur", color: "#10b981" },
-        { id: 3, name: "Farmacia La Salud", lat: 19.4380, lng: -99.1400, ruta: "Este", color: "#f59e0b" },
-        { id: 4, name: "Comercializadora Maya", lat: 19.4260, lng: -99.1380, ruta: "Oeste", color: "#ec4899" }
+        { id: 3, name: "Farmacia La Salud", lat: 19.4380, lng: -99.1400, ruta: "Este", color: "#f59e0b" }
     ];
 
-    clientesRuta.forEach(c => {
-        const customIcon = L.divIcon({
-            className: 'custom-pin',
-            html: `<div style="background-color: ${c.color}; width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.6);"></div>
-                   <span style="background: rgba(15,23,42,0.9); color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap; position: absolute; left: 30px; top: 2px; border: 1px solid #334155;">${c.name} (${c.ruta})</span>`,
-            iconSize: [26, 26],
-            iconAnchor: [13, 13]
+    clientes.forEach(c => {
+        // Marcador con pin coloreado y etiqueta flotante con el nombre del cliente
+        const pinIcon = L.divIcon({
+            className: 'custom-pin-container',
+            html: `
+                <div style="background-color:${c.color}; width:18px; height:18px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>
+                <div class="custom-pin-label" style="position:absolute; left:22px; top:-2px;">${c.name} (${c.ruta})</div>
+            `,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
         });
 
-        const marker = L.marker([c.lat, c.lng], { draggable: true, icon: customIcon }).addTo(map);
+        const marker = L.marker([c.lat, c.lng], { draggable: true, icon: pinIcon }).addTo(map);
         
-        marker.on('dragend', function(event) {
-            const position = marker.getLatLng();
-            c.lat = position.lat;
-            c.lng = position.lng;
-            console.log(`INTMEX - Pin actualizado -> ${c.name}: Lat ${position.lat}, Lng ${position.lng}`);
+        marker.on('dragend', function() {
+            const pos = marker.getLatLng();
+            c.lat = pos.lat;
+            c.lng = pos.lng;
         });
     });
 
-    // --- CHECKLIST DE SUPERVISIÓN (10 PASOS - SI / NO) ---
+    // --- 2. CHECKLIST DE 10 PASOS (SELECCIÓN DIRECTA SI / NO) ---
     const pasos = [
-        "1. Identificación del cliente en base de datos",
-        "2. Saludo cordial y presentación",
-        "3. Identificación de nuestras marcas (presencia)",
-        "4. Verificación de stock suficiente",
-        "5. Revisión de Caducidades (Sistema FIFO)",
-        "6. Labor de impulso de nuevas variantes",
-        "7. Cierre de promociones vigentes",
-        "8. Comunicar resumen de venta al cliente",
-        "9. Correcto manejo de objeciones",
-        "10. Despedida y agradecimiento"
+        "1. ID cliente en base de datos",
+        "2. Saludo al cliente",
+        "3. ID nuestras marcas",
+        "4. ID stock suficiente",
+        "5. Caducidades (FIFO)",
+        "6. Impulso de variantes",
+        "7. Cierre promos",
+        "8. Comunicar venta a cliente",
+        "9. Manejo de objeciones",
+        "10. Despedida"
     ];
 
-    const checklistContainer = document.getElementById('checklist-container');
-    const checklistState = {};
+    const gridContainer = document.getElementById('checklist-grid');
+    const checklistValores = {};
 
-    pasos.forEach((paso, index) => {
-        checklistState[index] = "SI"; // Predeterminado SI
-        const row = document.createElement('div');
-        row.className = 'checklist-row';
-        row.innerHTML = `
-            <span style="font-size: 14px;"><strong>${paso}</strong></span>
-            <div class="options-group">
-                <button type="button" class="btn-option active-si" id="btn-${index}-SI" onclick="setCheck(${index}, 'SI')">SI</button>
-                <button type="button" class="btn-option" id="btn-${index}-NO" onclick="setCheck(${index}, 'NO')">NO</button>
+    pasos.forEach((paso, idx) => {
+        checklistValores[idx] = "SI"; // Valor por defecto
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'step-item';
+        itemDiv.innerHTML = `
+            <span class="step-label">${paso}</span>
+            <div class="btn-toggle-group">
+                <button class="btn-toggle active-si" id="btn-si-${idx}" onclick="selectOption(${idx}, 'SI')">SI</button>
+                <button class="btn-toggle" id="btn-no-${idx}" onclick="selectOption(${idx}, 'NO')">NO</button>
             </div>
         `;
-        checklistContainer.appendChild(row);
+        gridContainer.appendChild(itemDiv);
     });
 
-    function setCheck(index, value) {
-        checklistState[index] = value;
-        const btnSi = document.getElementById(`btn-${index}-SI`);
-        const btnNo = document.getElementById(`btn-${index}-NO`);
-        if (value === 'SI') {
-            btnSi.className = 'btn-option active-si';
-            btnNo.className = 'btn-option';
+    function selectOption(idx, val) {
+        checklistValores[idx] = val;
+        const btnSi = document.getElementById(`btn-si-${idx}`);
+        const btnNo = document.getElementById(`btn-no-${idx}`);
+
+        if (val === 'SI') {
+            btnSi.className = 'btn-toggle active-si';
+            btnNo.className = 'btn-toggle';
         } else {
-            btnSi.className = 'btn-option';
-            btnNo.className = 'btn-option active-no';
+            btnSi.className = 'btn-toggle';
+            btnNo.className = 'btn-toggle active-no';
         }
     }
 
-    // --- MANEJO DE FIRMAS CANVAS ---
-    function setupCanvas(id) {
+    // --- 3. CONFIGURACIÓN DE CANVAS DE FIRMAS ---
+    function initCanvas(id) {
         const canvas = document.getElementById(id);
         const ctx = canvas.getContext('2d');
-        let painting = false;
+        let drawing = false;
 
-        // Ajustar el tamaño del canvas interno al tamaño del contenedor
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth - 30; // Restando padding
-            canvas.height = 130;
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth - 24;
+            canvas.height = 110;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', resize);
+        resize();
 
-        function startPosition(e) { 
-            painting = true; 
-            draw(e); 
-            // Prevenir scroll en móviles mientras se firma
-            if(e.type.includes('touch')) e.preventDefault(); 
+        function start(e) {
+            drawing = true;
+            draw(e);
         }
-        function endPosition() { painting = false; ctx.beginPath(); }
+        function stop() {
+            drawing = false;
+            ctx.beginPath();
+        }
         function draw(e) {
-            if (!painting) return;
-            if(e.type.includes('touch')) e.preventDefault();
-            
-            ctx.lineWidth = 2.5;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#38bdf8';
-
+            if (!drawing) return;
             const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-            ctx.lineTo(x, y);
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#00b4d8';
+
+            ctx.lineTo(clientX - rect.left, clientY - rect.top);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(x, y);
+            ctx.moveTo(clientX - rect.left, clientY - rect.top);
         }
 
-        canvas.addEventListener('mousedown', startPosition);
-        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mouseup', stop);
         canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchstart', startPosition, {passive: false});
-        canvas.addEventListener('touchend', endPosition);
-        canvas.addEventListener('touchmove', draw, {passive: false});
+        canvas.addEventListener('touchstart', start);
+        canvas.addEventListener('touchend', stop);
+        canvas.addEventListener('touchmove', draw);
     }
 
-    setupCanvas('sig-asesor');
-    setupCanvas('sig-supervisor');
+    initCanvas('sig-asesor');
+    initCanvas('sig-supervisor');
 
-    function clearSig(type) {
-        const canvas = document.getElementById(`sig-${type}`);
+    function clearCanvas(id) {
+        const canvas = document.getElementById(id);
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // --- FUNCIONES DE LOS 3 REPORTES ---
-    function exportMyMaps() {
-        let csvContent = "data:text/csv;charset=utf-8,Name,Latitude,Longitude,Route,Color\n";
-        clientesRuta.forEach(c => {
-            csvContent += `"${c.name}",${c.lat},${c.lng},"${c.ruta}","${c.color}"\n`;
+    // --- 4. FUNCIONALIDADES DE LOS 3 REPORTES ---
+
+    // Reporte 1: Base de datos limpia para My Maps
+    function downloadMyMapsCSV() {
+        let csv = "Name,Latitude,Longitude,Route,Color\n";
+        clientes.forEach(c => {
+            csv += `"${c.name}",${c.lat},${c.lng},"${c.ruta}","${c.color}"\n`;
         });
-        const encodedUri = encodeURI(csvContent);
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "INTMEX_Base_Datos_MyMaps.csv");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", "MyMaps_Base_Datos_INTMEX.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
 
-    function exportPerformanceReport() {
-        alert("SUPERVISION INTMEX\n\nGenerando Reporte de Desempeño del Asesor...\nIncluyendo desglose del checklist 10 pasos (SI/NO), notas de visita, evidencia de fachada y validación mediante firmas digitales.");
+    // Reporte 2: Desempeño individual con Firmas
+    function generatePerformanceReport() {
+        window.print();
     }
 
-    function exportExecutiveReport() {
-        alert("SUPERVISION INTMEX\n\nGenerando Reporte Ejecutivo Global...\nConsolidado detallado con métricas de segmentación, compra efectiva, cumplimiento general y coordenadas geográficas de la ruta.");
+    // Reporte 3: Reporte Ejecutivo Global
+    function generateExecutiveReport() {
+        alert("SUPERVISION INTMEX: Generando Reporte Ejecutivo Global con estadísticas de cumplimiento e historial general de rutas.");
+        window.print();
     }
 </script>
 
