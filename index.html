@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUPERVISION INTMEX - Panel Ejecutivo Gerencial</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        #map { height: 450px; border-radius: 0.5rem; cursor: crosshair; }
+        .route-pin { background: none !important; border: none !important; }
+        .signature-pad { border: 2px dashed #4b5563; background: #1f2937; border-radius: 0.5rem; cursor: crosshair; touch-action: none; }
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print, header, nav, button { display: none !important; }
+            body.printing-report > *:not(#report-overlay) { display: none !important; }
+            body.printing-report #report-overlay { position: static !important; overflow: visible !important; background: white !important; }
+            #report-overlay .break-avoid { break-inside: avoid; }
+            #report-overlay { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .print-container { background: white !important; color: black !important; border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-28">
+
+    <!-- Header con Logotipo e Identidad -->
+    <header class="no-print bg-slate-800 border-b border-slate-700 py-3 px-6 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow border-2 border-blue-400 overflow-hidden flex-shrink-0">
+                    <img src="data:image/gif;base64,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" alt="INTMEX Logo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide text-blue-400">SUPERVISION INTMEX</h1>
+                    <p class="text-xs text-slate-400">Panel Ejecutivo Gerencial | Control de Campo y Auditoría</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 mt-2 md:mt-0 flex-wrap">
+                <button onclick="toggleRescuePanel()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Panel de Rescate
+                </button>
+                <div id="gps-status" class="bg-emerald-900/60 border border-emerald-500 text-emerald-300 text-xs px-3 py-1.5 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot animate-pulse"></i>
+                    <span id="gps-text">GPS Activo</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- PANEL DE RESCATE -->
+    <div id="rescue-panel" class="no-print max-w-7xl mx-auto px-4 mt-4 hidden">
+        <div class="bg-amber-950/80 border border-amber-600 rounded-xl p-4 shadow-xl">
+            <h3 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> Centro de Recuperación de Datos
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportBackup()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-2 rounded font-medium">
+                    <i class="fa-solid fa-download"></i> Descargar Respaldo JSON
+                </button>
+                <label class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-2 rounded font-medium cursor-pointer">
+                    <i class="fa-solid fa-upload"></i> Cargar Respaldo JSON <input type="file" accept=".json" onchange="importBackup(event)" class="hidden">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. DATOS DE RUTA Y ASESOR -->
+    <section class="no-print max-w-7xl mx-auto px-4 mt-6">
+        <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-4 shadow-lg">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
+                <h2 class="text-sm font-semibold text-blue-300 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-id-card"></i> 1. Datos de Ruta y Asesor (Fijos en Jornada)
+                </h2>
+                <span class="text-xs text-slate-400 bg-slate-700 px-2 py-0.5 rounded">Autoguardado activo</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">CEDIS</label>
+                    <select id="f-cedis" onchange="onCedisChange()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                        <option value="">Seleccione CEDIS</option>
+                        <option value="TIJ">TIJUANA</option>
+                        <option value="MXLI">MEXICALI</option>
+                        <option value="HILLO">HERMOSILLO</option>
+                        <option value="MOC">MOCHIS</option>
+                        <option value="CUL">CULIACAN</option>
+                        <option value="MZT">MAZATLAN</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Ruta</label>
+                    <select id="f-ruta" onchange="saveRouteData()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                        <option value="">Primero seleccione un CEDIS</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Nombre del Asesor</label>
+                    <input type="text" id="f-asesor" placeholder="Ej. Carlos Gutiérrez" oninput="saveRouteData()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Tipo de Ruta</label>
+                    <select id="f-tipo-ruta" onchange="saveRouteData()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                        <option value="Ruta Activa">Ruta Activa</option>
+                        <option value="Ruta Nueva">Ruta Nueva</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs text-slate-400 mb-1">Objetivo de Supervisión</label>
+                    <div class="flex gap-2">
+                        <select id="f-objetivo" onchange="onObjetivoChange()" class="min-w-0 flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                            <option value="">Seleccione Objetivo</option>
+                            <option value="Venta">Venta</option>
+                            <option value="Capacitación">Capacitación</option>
+                            <option value="Territorio">Territorio</option>
+                        </select>
+                        <select id="f-subobjetivo" onchange="saveRouteData()" class="hidden min-w-0 flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <main class="max-w-7xl mx-auto px-4 mt-6">
+        <!-- TAB 2: REGISTRO DE CLIENTES -->
+        <div id="tab-clientes" class="tab-content bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+            <h2 id="form-title" class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus"></i> 2. Alta de Cliente en Base de Datos
+            </h2>
+            <form id="client-form" onsubmit="registerClient(event)" class="space-y-4">
+                <input type="hidden" id="edit-index" value="">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">¿Cliente Abierto?</label>
+                        <select id="c-abierto" onchange="toggleClientFields()" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="SÍ">SÍ</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Nombre del Cliente</label>
+                        <input type="text" id="c-nombre" required placeholder="Ej. Mini Super Alex" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Ruta del Cliente</label>
+                        <select id="c-ruta" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="">Ruta de la jornada (automática)</option>
+                        </select>
+                    </div>
+                    <div id="wrapper-tipo-cierre" style="display: none;">
+                        <label class="block text-xs text-amber-400 mb-1 font-bold">Tipo Cierre (Si está cerrado)</label>
+                        <input type="text" id="c-tipo-cierre" placeholder="Ej. Solo esta visita / Vacaciones" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">Teléfono</label>
+                        <input type="tel" id="c-telefono" placeholder="Ej. 6641234567" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">¿Quién Recibe?</label>
+                        <input type="text" id="c-recibe" placeholder="Persona que atiende" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">Segmento de Cliente</label>
+                        <select id="c-segmento" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="Tipo A">Tipo A: Cobro, pasillos, refis y carnicería</option>
+                            <option value="Tipo B">Tipo B: Pasillos y refrigeradores</option>
+                            <option value="Tipo C">Tipo C: Solo exhibición básica</option>
+                            <option value="Tipo D">Tipo D: Fuera de ruta / Otro</option>
+                        </select>
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">Impacto de Prioridades</label>
+                        <select id="c-impacto" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="SÍ">SÍ</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">¿Compra Efectiva?</label>
+                        <select id="c-compra" onchange="toggleClientFields()" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="SÍ">SÍ</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </div>
+                    <div id="wrapper-motivo" style="display: none;">
+                        <label class="block text-xs text-amber-400 mb-1 font-bold">Motivo No Compra</label>
+                        <select id="c-motivo-no-compra" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value=""></option>
+                            <option value="Sin dinero">Sin dinero</option>
+                            <option value="Con inventario">Con inventario</option>
+                            <option value="No está encargado">No está encargado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="conditional-field grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Códigos sin Impactar / Comentarios</label>
+                        <textarea id="c-codigos" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">Ninguno</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Notas de Auditoría</label>
+                        <textarea id="c-notas" rows="2" placeholder="Observaciones adicionales..." class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200"></textarea>
+                    </div>
+                </div>
+
+                <!-- CAMARA NATIVA OBLIGATORIA -->
+                <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg">
+                    <label class="block text-xs text-amber-400 mb-1 font-bold">
+                        <i class="fa-solid fa-camera"></i> Foto de Fachada o Negocio (Abre Cámara Directa)
+                    </label>
+                    <input type="file" id="c-foto" accept="image/*" capture="environment" onchange="previewImage(event)" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                    <div id="foto-preview-container" class="mt-2 hidden">
+                        <img id="foto-preview" class="w-32 h-32 object-cover rounded border border-slate-600" alt="Vista previa">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center">
+                    <button type="button" id="cancel-edit-btn" onclick="cancelEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-white font-medium px-4 py-2 rounded-lg text-xs">Cancelar Edición</button>
+                    <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition flex items-center gap-2 text-sm ml-auto">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cliente en Reporte Ejecutivo
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 3: SUPERVISION -->
+        <div id="tab-supervision" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+            <h2 class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list"></i> 3. Supervisión y Evaluación
+            </h2>
+            <div class="mb-6 p-4 bg-slate-900 border border-slate-700 rounded-lg">
+                <label class="block text-xs text-slate-400 mb-2 font-semibold uppercase">Seleccionar Cliente:</label>
+                <select id="supervision-client-select" class="w-full bg-slate-800 border border-slate-600 rounded p-2.5 text-sm text-slate-200">
+                    <option value="">-- Seleccione un cliente --</option>
+                </select>
+            </div>
+            <form id="supervision-form" onsubmit="submitSupervision(event)" class="space-y-4">
+                <div id="checklist-container" class="space-y-2"></div>
+                <div class="pt-4 flex justify-end">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition text-sm"><i class="fa-solid fa-floppy-disk mr-2"></i>Guardar Supervisión</button>
+                </div>
+            </form>
+
+            <!-- Cierre de la jornada: firma única de asesor y supervisor -->
+            <div class="mt-6 p-4 bg-slate-900 border border-slate-700 rounded-lg">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-200">Cierre de la jornada</p>
+                        <p id="sup-summary" class="text-xs text-slate-400">Supervisiones guardadas: 0</p>
+                    </div>
+                    <button type="button" id="btn-open-finalize" onclick="openFinalizePanel()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition text-sm"><i class="fa-solid fa-flag-checkered mr-2"></i>Finalizar Supervisión</button>
+                </div>
+                <div id="finalize-panel" class="hidden mt-4 pt-4 border-t border-slate-700">
+                    <p class="text-xs text-slate-400 mb-3">Esta firma será única y se agrega al Reporte del Asesor con todas las supervisiones guardadas.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1 font-semibold">Firma Asesor</label>
+                            <canvas id="asesor-sig-pad" class="signature-pad w-full h-32"></canvas>
+                            <button type="button" onclick="clearSig('asesor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar</button>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1 font-semibold">Firma Supervisor</label>
+                            <canvas id="supervisor-sig-pad" class="signature-pad w-full h-32"></canvas>
+                            <button type="button" onclick="clearSig('supervisor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar</button>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-end gap-2">
+                        <button type="button" onclick="cancelFinalize()" class="bg-slate-700 hover:bg-slate-600 text-white text-sm px-4 py-2.5 rounded-lg">Cancelar</button>
+                        <button type="button" onclick="confirmFinalize()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow text-sm"><i class="fa-solid fa-check mr-2"></i>Confirmar y Finalizar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MAPA INTERACTIVO -->
+        <div id="tab-mapa" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl relative">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+                <div>
+                    <h2 class="text-lg font-semibold text-blue-400 flex items-center gap-2">
+                        <i class="fa-solid fa-map"></i> 4. Mapa Interactivo - Corrección de Pines de Clientes
+                    </h2>
+                    <p class="text-xs text-slate-400">Haz clic sobre el pin desfasado de un cliente registrado en el mapa para iniciar la corrección.</p>
+                </div>
+            </div>
+            
+            <div id="map-notice" class="bg-blue-950/80 border border-blue-500 text-blue-200 text-xs p-3 rounded-lg mb-3 flex items-center justify-between">
+                <span id="map-instruction-text"><i class="fa-solid fa-circle-info"></i> Arrastra un pin para corregir su ubicación, o tócalo para ver sus datos y editarlos.</span>
+            </div>
+
+            <div id="map-legend" class="flex flex-wrap items-center gap-2 mb-3"></div>
+            <div id="map"></div>
+        </div>
+
+        <!-- TAB 5: HISTORIAL Y REPORTE GERENCIAL -->
+        <div id="tab-historial" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl print-container">
+            <!-- Botones Superiores del Panel Gerencial -->
+            <div class="no-print flex flex-wrap gap-3 mb-6 bg-slate-900/80 p-3 rounded-xl border border-slate-700 items-center">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Imprimir Reporte / Evaluación y Firmas
+                </button>
+                <button onclick="generateAdvisorReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines"></i> Reporte del Asesor
+                </button>
+                <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> CSV Base de Datos
+                </button>
+                <button onclick="clearHistory()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow ml-auto flex items-center gap-2">
+                    <i class="fa-solid fa-trash"></i> Borrar Todo
+                </button>
+            </div>
+
+            <!-- 4 Tarjetas de Métricas Principales -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-slate-900 border-l-4 border-blue-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Visitas</p>
+                    <p id="metric-total" class="text-2xl font-black text-white mt-1">0</p>
+                </div>
+                <div class="bg-slate-900 border-l-4 border-emerald-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">% Clientes Abiertos</p>
+                    <p id="metric-abiertos" class="text-2xl font-black text-emerald-400 mt-1">0.0%</p>
+                </div>
+                <div class="bg-slate-900 border-l-4 border-amber-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">% Compra Efectiva</p>
+                    <p id="metric-compra" class="text-2xl font-black text-amber-400 mt-1">0.0%</p>
+                </div>
+                <div class="bg-slate-900 border-l-4 border-cyan-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">% Impacto Prioridades</p>
+                    <p id="metric-impacto" class="text-2xl font-black text-cyan-400 mt-1">0.0%</p>
+                </div>
+            </div>
+
+            <!-- Evaluación y Calificación del Asesor -->
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl shadow mb-6">
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-2"><i class="fa-solid fa-award"></i> Evaluación y Calificación del Asesor</h3>
+                <p id="eval-score" class="text-sm text-slate-300 font-medium mb-2">Promedio de Aciertos en Checklist: 0.0 / 10</p>
+                <div id="eval-status" class="bg-red-950/80 border border-red-600 text-red-300 text-xs font-bold px-3 py-2 rounded-lg mb-3 inline-block">
+                    Estatus de Desempeño: INEFICIENTE
+                </div>
+                <div class="mt-2 text-xs text-slate-400">
+                    <p class="font-bold text-amber-400 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Áreas donde requiere capacitación (Pasos con más fallos):</p>
+                    <ul id="eval-fallos-list" class="list-disc list-inside space-y-0.5 text-slate-300 pl-2">
+                        <!-- Generado Dinámicamente -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Distribución de Clientes Segmentados -->
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl shadow mb-6">
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3"><i class="fa-solid fa-chart-column"></i> Distribución de Clientes Segmentados</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo A</p>
+                        <p id="seg-a" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo B</p>
+                        <p id="seg-b" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo C</p>
+                        <p id="seg-c" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo D</p>
+                        <p id="seg-d" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registro Detallado con Modificación y Firmas -->
+            <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3">5. Registro Detallado de Clientes y Evidencias</h3>
+            <div id="history-container" class="space-y-4">
+                <p class="text-sm text-slate-400 text-center py-8">No hay registros guardados todavía.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Barra de pestañas inferior (fija) -->
+    <nav class="no-print fixed bottom-0 inset-x-0 z-[2000] bg-slate-800 border-t border-slate-700 shadow-[0_-4px_12px_rgba(0,0,0,0.35)]" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+        <div class="max-w-7xl mx-auto flex justify-around">
+            <button onclick="switchTab('clientes')" id="btn-tab-clientes" class="tab-btn flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-blue-400 hover:text-white transition">
+                <i class="fa-solid fa-user-plus text-lg"></i><span>Clientes</span>
+            </button>
+            <button onclick="switchTab('supervision')" id="btn-tab-supervision" class="tab-btn flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-clipboard-check text-lg"></i><span>Supervisión</span>
+            </button>
+            <button onclick="switchTab('mapa')" id="btn-tab-mapa" class="tab-btn flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-map-location-dot text-lg"></i><span>Mapa</span>
+            </button>
+            <button onclick="switchTab('historial')" id="btn-tab-historial" class="tab-btn flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-chart-line text-lg"></i><span>Reporte</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Script Principal -->
+    <script>
+        let currentLat = 32.47027;
+        let currentLng = -116.83785;
+        let map, markersLayer;
+        let clientBeingCorrected = null; 
+        let pendingNewLat = null, pendingNewLng = null, pendingFromDrag = false;
+        const markerById = {};
+        const hiddenRoutes = new Set();
+        let base64Photo = '';
+
+        const checklistSteps = [
+            "1. ID Cliente en Base de Datos", "2. Saludo a Cliente", "3. ID Nuestras Marcas",
+            "4. ID Stock", "5. Revisión de Caducidades", "6. Impulso de Variantes",
+            "7. Cierre Promos", "8. Comunicar Venta a Cliente", "9. Manejo de Objeciones", "10. Despedida"
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadRouteData();
+            initGPS();
+            initChecklist();
+            buildClientRouteOptions();
+            initSignaturePads();
+            updateSupervisionSummary();
+            initMap();
+            loadHistory();
+            updateClientDropdown();
+            toggleClientFields();
+        });
+
+        function toggleClientFields() {
+            const abierto = document.getElementById('c-abierto').value;
+            const tipoCierreWrapper = document.getElementById('wrapper-tipo-cierre');
+            const conditionalFields = document.querySelectorAll('.conditional-field');
+            const tipoCierreInput = document.getElementById('c-tipo-cierre');
+
+            if (abierto === 'NO') {
+                tipoCierreWrapper.style.display = 'block';
+                tipoCierreInput.required = true;
+                conditionalFields.forEach(el => el.style.display = 'none');
+            } else {
+                tipoCierreWrapper.style.display = 'none';
+                tipoCierreInput.required = false;
+                tipoCierreInput.value = '';
+                conditionalFields.forEach(el => el.style.display = 'block');
+            }
+            const motivoWrap = document.getElementById('wrapper-motivo'), motivoSel = document.getElementById('c-motivo-no-compra');
+            const showMotivo = abierto === 'SÍ' && document.getElementById('c-compra').value === 'NO';
+            motivoWrap.style.display = showMotivo ? 'block' : 'none';
+            motivoSel.required = showMotivo;
+            if (!showMotivo) motivoSel.value = '';
+        }
+
+        function toggleRescuePanel() { document.getElementById('rescue-panel').classList.toggle('hidden'); }
+        function exportBackup() {
+            const backupData = { history: JSON.parse(localStorage.getItem('intmex_history') || '[]'), route: JSON.parse(localStorage.getItem('intmex_route_data') || '{}'), finalSig: JSON.parse(localStorage.getItem('intmex_final_sig') || 'null') };
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `respaldo_intmex.json`; a.click();
+        }
+        function importBackup(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (data.history) localStorage.setItem('intmex_history', JSON.stringify(data.history));
+                    if (data.route) localStorage.setItem('intmex_route_data', JSON.stringify(data.route));
+                    if (data.finalSig) localStorage.setItem('intmex_final_sig', JSON.stringify(data.finalSig));
+                    alert('¡Respaldo cargado con éxito!'); location.reload();
+                } catch(err) { alert('Error al leer el archivo.'); }
+            };
+            reader.readAsText(file);
+        }
+        function clearHistory() {
+            if(confirm('¿Vaciar todo el historial?')) { localStorage.removeItem('intmex_history'); localStorage.removeItem('intmex_final_sig'); loadHistory(); updateClientDropdown(); updateMapMarkers(); }
+        }
+        function exportCSV() {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            if(history.length === 0) { alert('No hay datos.'); return; }
+            let csv = 'Fecha,CEDIS,Ruta,Asesor,Tipo Ruta,Objetivo,Cliente Abierto,Tipo Cierre,Cliente,Teléfono,Atiende,Segmento,Impacto Prioridades,Compra Efectiva,Motivo No Compra,Puntaje,Calificación,Códigos,Notas\n';
+            history.forEach(i => { 
+                const routeInfo = JSON.parse(localStorage.getItem('intmex_route_data') || '{}');
+                csv += `"${i.timestamp}","${i.ruta ? i.ruta.replace(/\d{2}$/, '') : (routeInfo.cedis||'')}","${i.ruta||routeInfo.ruta||''}","${routeInfo.asesor||''}","${routeInfo.tipoRuta||''}","${routeInfo.objetivo||''}${routeInfo.subObjetivo?' - '+routeInfo.subObjetivo:''}","${i.abierto}","${i.tipoCierre||'-'}","${i.nombre}","${i.telefono||''}","${i.recibe||''}","${i.segmento||'-'}","${i.impacto||'-'}","${i.compra||'-'}","${i.motivoNoCompra||'-'}",${i.checklistScore!==undefined?i.checklistScore*10:0},"${i.checklistScore!==undefined?(i.checklistScore>=8?'EXCELENTE':i.checklistScore>=6?'EN DESARROLLO':'OCUPA CAPACITACION'):'PENDIENTE'}","${i.codigos||'-'}","${i.notas||'-'}"\n`; 
+            });
+            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `reporte_intmex.csv`; a.click();
+        }
+        function populateRoutes(cedisVal, selectedRuta = '') {
+            const rutaSelect = document.getElementById('f-ruta');
+            rutaSelect.innerHTML = '<option value="">Seleccione Ruta</option>';
+            if (!cedisVal) return;
+            for (let i = 1; i <= 18; i++) {
+                const num = i < 10 ? '0' + i : i; const val = `${cedisVal}${num}`;
+                rutaSelect.innerHTML += `<option value="${val}" ${val===selectedRuta?'selected':''}>${val}</option>`;
+            }
+        }
+        function onCedisChange() { populateRoutes(document.getElementById('f-cedis').value); saveRouteData(); }
+        const SUBOBJETIVOS = {
+            'Venta': ['Efectividad de venta', 'Impulso'],
+            'Territorio': ['Carga de clientes', 'Reestructura'],
+            'Capacitación': ['Nuevo ingreso', 'Refuerzo']
+        };
+        function populateSubObjetivo(objetivo, selected) {
+            const sub = document.getElementById('f-subobjetivo');
+            const opciones = SUBOBJETIVOS[objetivo] || [];
+            if (!opciones.length) { sub.innerHTML = ''; sub.classList.add('hidden'); return; }
+            sub.innerHTML = opciones.map(o => `<option value="${o}">${o}</option>`).join('');
+            sub.selectedIndex = Math.max(0, opciones.indexOf(selected));
+            if (!selected) sub.selectedIndex = -1;
+            sub.classList.remove('hidden');
+        }
+        function onObjetivoChange() { populateSubObjetivo(document.getElementById('f-objetivo').value); saveRouteData(); }
+        function saveRouteData() {
+            localStorage.setItem('intmex_route_data', JSON.stringify({
+                cedis: document.getElementById('f-cedis').value, ruta: document.getElementById('f-ruta').value,
+                asesor: document.getElementById('f-asesor').value, tipoRuta: document.getElementById('f-tipo-ruta').value, objetivo: document.getElementById('f-objetivo').value, subObjetivo: document.getElementById('f-subobjetivo').value
+            }));
+        }
+        function loadRouteData() {
+            const saved = localStorage.getItem('intmex_route_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('f-cedis').value = data.cedis || '';
+                if(data.cedis) populateRoutes(data.cedis, data.ruta);
+                document.getElementById('f-asesor').value = data.asesor || '';
+                document.getElementById('f-tipo-ruta').value = data.tipoRuta || 'Ruta Activa';
+                document.getElementById('f-objetivo').value = data.objetivo || '';
+                populateSubObjetivo(data.objetivo || '', data.subObjetivo || '');
+            }
+        }
+        function initGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    currentLat = pos.coords.latitude; currentLng = pos.coords.longitude;
+                    if (map) map.setView([currentLat, currentLng], 16);
+                }, () => {});
+            }
+        }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.remove('text-blue-400'); btn.classList.add('text-slate-400'); });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            activeBtn.classList.remove('text-slate-400'); activeBtn.classList.add('text-blue-400'); window.scrollTo({ top: 0 });
+            if(tabId === 'supervision') { sizeSignaturePads(); updateSupervisionSummary(); }
+            if(tabId === 'mapa' && map) { setTimeout(() => map.invalidateSize(), 200); updateMapMarkers(); }
+            if(tabId === 'historial') loadHistory();
+        }
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64Photo = e.target.result;
+                    document.getElementById('foto-preview').src = base64Photo;
+                    document.getElementById('foto-preview-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        function initChecklist() {
+            const container = document.getElementById('checklist-container'); container.innerHTML = '';
+            checklistSteps.forEach((step, idx) => {
+                container.innerHTML += `<div class="flex items-center justify-between bg-slate-900 border border-slate-700/60 p-3 rounded-lg"><span class="text-sm font-medium text-slate-200">${step}</span><div class="flex gap-2"><button type="button" onclick="setCheck(${idx}, 'SÍ')" id="chk-${idx}-si" class="px-4 py-1.5 text-xs font-bold rounded bg-slate-800 text-slate-300 border border-slate-600">SÍ</button><button type="button" onclick="setCheck(${idx}, 'NO')" id="chk-${idx}-no" class="px-4 py-1.5 text-xs font-bold rounded bg-slate-800 text-slate-300 border border-slate-600">NO</button></div></div>`;
+            });
+        }
+        const checkValues = {};
+        function setCheck(idx, val) {
+            checkValues[idx] = val;
+            document.getElementById(`chk-${idx}-si`).className = val === 'SÍ' ? "px-4 py-1.5 text-xs font-bold rounded bg-emerald-600 text-white" : "px-4 py-1.5 text-xs font-bold rounded bg-slate-800 text-slate-300 border border-slate-600";
+            document.getElementById(`chk-${idx}-no`).className = val === 'NO' ? "px-4 py-1.5 text-xs font-bold rounded bg-red-600 text-white" : "px-4 py-1.5 text-xs font-bold rounded bg-slate-800 text-slate-300 border border-slate-600";
+        }
+        function setupCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId), ctx = canvas.getContext('2d'); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; let drawing = false;
+            canvas.width = canvas.parentElement.clientWidth; canvas.height = 120;
+            canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+            canvas.addEventListener('mousemove', (e) => { if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('touchstart', (e) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); });
+            canvas.addEventListener('touchmove', (e) => { if(drawing){ const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); ctx.stroke(); } e.preventDefault(); });
+            canvas.addEventListener('touchend', () => drawing = false);
+        }
+        function initSignaturePads() { setupCanvas('asesor-sig-pad'); setupCanvas('supervisor-sig-pad'); }
+        function clearSig(canvasId) { const canvas = document.getElementById(canvasId); canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); }
+
+        function initMap() {
+            map = L.map('map').setView([currentLat, currentLng], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+            updateMapMarkers();
+
+            map.on('click', function(e) {
+                if (clientBeingCorrected && !pendingFromDrag) {
+                    pendingNewLat = e.latlng.lat;
+                    pendingNewLng = e.latlng.lng;
+                    showFloatingConfirmButton(`¿Es correcta la ubicación de ${clientBeingCorrected.nombre}?`);
+                }
+            });
+        }
+
+        const ROUTE_PALETTE = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6', '#6366f1', '#eab308', '#8b5cf6', '#10b981', '#f43f5e', '#0ea5e9'];
+        function routeColor(ruta) {
+            if (!ruta) return '#94a3b8'; // sin ruta: gris
+            let m = {};
+            try { m = JSON.parse(localStorage.getItem('intmex_route_colors') || '{}'); } catch (err) { m = {}; }
+            if (m[ruta] === undefined) {
+                const used = new Set(Object.values(m));
+                let idx = 0; while (used.has(idx) && idx < ROUTE_PALETTE.length) idx++;
+                if (idx >= ROUTE_PALETTE.length) idx = Object.keys(m).length % ROUTE_PALETTE.length;
+                m[ruta] = idx;
+                localStorage.setItem('intmex_route_colors', JSON.stringify(m));
+            }
+            return ROUTE_PALETTE[m[ruta]];
+        }
+        function pinIcon(color) {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="42" viewBox="0 0 30 42"><path d="M15 1C7 1 1 7.2 1 15c0 10.6 14 25.5 14 25.5S29 25.6 29 15C29 7.2 23 1 15 1z" fill="${color}" stroke="#0f172a" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#ffffff"/></svg>`;
+            return L.divIcon({ className: 'route-pin', html: svg, iconSize: [30, 42], iconAnchor: [15, 41], popupAnchor: [0, -38] });
+        }
+        function renderMapLegend(history) {
+            const el = document.getElementById('map-legend'); if (!el) return;
+            const counts = {};
+            history.forEach(i => { if (i.lat && i.lng) { const k = i.ruta || ''; counts[k] = (counts[k] || 0) + 1; } });
+            const keys = Object.keys(counts).sort((a, b) => ((a === '' ? 1 : 0) - (b === '' ? 1 : 0)) || a.localeCompare(b));
+            if (!keys.length) { el.innerHTML = '<span class="text-xs text-slate-400">Aún no hay clientes con ubicación.</span>'; return; }
+            el.innerHTML = keys.map(k => `<button type="button" onclick="toggleRouteFilter('${k}')" class="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-full px-2.5 py-1 text-xs text-slate-200 ${hiddenRoutes.has(k) ? 'opacity-40 line-through' : ''}"><span style="width:10px;height:10px;border-radius:9999px;display:inline-block;background:${routeColor(k)}"></span>${k ? escHtml(k) : 'Sin ruta'} (${counts[k]})</button>`).join('')
+                + (hiddenRoutes.size ? '<button type="button" onclick="showAllRoutes()" class="text-xs text-blue-400 underline ml-1">Mostrar todas</button>' : '');
+        }
+        function toggleRouteFilter(key) { if (hiddenRoutes.has(key)) hiddenRoutes.delete(key); else hiddenRoutes.add(key); cancelNewPinPosition(); updateMapMarkers(); }
+        function showAllRoutes() { hiddenRoutes.clear(); updateMapMarkers(); }
+
+        function updateMapMarkers() {
+            if(!markersLayer) return;
+            markersLayer.clearLayers();
+            Object.keys(markerById).forEach(k => delete markerById[k]);
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            renderMapLegend(history);
+            history.forEach(item => {
+                if(!(item.lat && item.lng)) return;
+                if(hiddenRoutes.has(item.ruta || '')) return;
+                const marker = L.marker([item.lat, item.lng], { icon: pinIcon(routeColor(item.ruta)), draggable: true, title: item.nombre });
+                marker._orig = [item.lat, item.lng];
+                marker.bindPopup(`<b>${escHtml(item.nombre)}</b><br>Ruta: ${escHtml(item.ruta || 'Sin ruta')}<br>Segmento: ${escHtml(item.segmento || 'N/A')}<div style="display:flex;gap:6px;margin-top:8px"><button onclick="editClientById('${item.id}')" class="bg-amber-600 text-white text-xs px-2 py-1 rounded">Editar datos</button><button onclick="startCorrectPin('${item.id}')" class="bg-blue-600 text-white text-xs px-2 py-1 rounded">Ubicar con clic</button></div><div style="font-size:11px;color:#64748b;margin-top:4px">También puedes arrastrar el pin.</div>`);
+                marker.on('dragend', () => onPinDragged(item.id, marker));
+                markerById[item.id] = marker;
+                markersLayer.addLayer(marker);
+            });
+        }
+        function revertPendingMarker() {
+            if (clientBeingCorrected && markerById[clientBeingCorrected.id]) {
+                const mk = markerById[clientBeingCorrected.id]; mk.setLatLng(mk._orig);
+            }
+        }
+        function onPinDragged(id, marker) {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const item = history.find(i => i.id === id); if (!item) return;
+            if (clientBeingCorrected && clientBeingCorrected.id !== id) revertPendingMarker(); // otro pin movido sin guardar: se regresa
+            clientBeingCorrected = item;
+            const ll = marker.getLatLng(); pendingNewLat = ll.lat; pendingNewLng = ll.lng; pendingFromDrag = true;
+            showFloatingConfirmButton(`¿Mover ${escHtml(item.nombre)} a esta ubicación?`);
+        }
+        function buildClientRouteOptions() {
+            const sel = document.getElementById('c-ruta'); if (!sel) return;
+            const cedis = Array.from(document.getElementById('f-cedis').options).filter(o => o.value);
+            sel.innerHTML = '<option value="">Ruta de la jornada (automática)</option>' + cedis.map(c =>
+                `<optgroup label="${c.text}">` + Array.from({ length: 18 }, (_, i) => { const v = c.value + String(i + 1).padStart(2, '0'); return `<option value="${v}">${v}</option>`; }).join('') + '</optgroup>').join('');
+        }
+        function editClientById(id) {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const idx = history.findIndex(i => i.id === id);
+            if (idx >= 0) { if (map) map.closePopup(); editClient(idx); }
+        }
+
+        function registerClient(e) {
+            e.preventDefault();
+            const editIdx = document.getElementById('edit-index').value;
+            const abierto = document.getElementById('c-abierto').value;
+            
+            const prevItem = editIdx !== "" ? (JSON.parse(localStorage.getItem('intmex_history') || '[]')[editIdx] || {}) : {};
+            const rutaSel = document.getElementById('c-ruta').value;
+            const clientData = Object.assign({}, prevItem, {
+                id: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].id : 'CLI_' + Date.now(),
+                abierto: abierto,
+                tipoCierre: abierto === 'NO' ? document.getElementById('c-tipo-cierre').value : 'N/A',
+                nombre: document.getElementById('c-nombre').value,
+                telefono: abierto === 'SÍ' ? document.getElementById('c-telefono').value : '',
+                recibe: abierto === 'SÍ' ? document.getElementById('c-recibe').value : '',
+                segmento: abierto === 'SÍ' ? document.getElementById('c-segmento').value : 'Cerrado',
+                impacto: abierto === 'SÍ' ? document.getElementById('c-impacto').value : 'N/A',
+                compra: abierto === 'SÍ' ? document.getElementById('c-compra').value : 'N/A',
+                motivoNoCompra: (abierto === 'SÍ' && document.getElementById('c-compra').value === 'NO') ? document.getElementById('c-motivo-no-compra').value : 'N/A',
+                codigos: abierto === 'SÍ' ? document.getElementById('c-codigos').value : '',
+                notas: abierto === 'SÍ' ? document.getElementById('c-notas').value : '',
+                foto: base64Photo || (editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].foto : ''),
+                lat: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].lat : currentLat,
+                lng: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].lng : currentLng,
+                timestamp: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].timestamp : new Date().toLocaleString(),
+                checklistScore: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].checklistScore : undefined,
+                checklistDetails: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].checklistDetails : undefined,
+                asesorSig: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].asesorSig : undefined,
+                supervisorSig: editIdx !== "" ? JSON.parse(localStorage.getItem('intmex_history'))[editIdx].supervisorSig : undefined,
+                ruta: editIdx !== "" ? (rutaSel || prevItem.ruta || '') : (rutaSel || document.getElementById('f-ruta').value || '')
+            });
+
+            let history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            if (editIdx !== "") {
+                history[editIdx] = clientData;
+                alert('¡Registro de cliente actualizado con éxito!');
+                cancelEdit();
+            } else {
+                history.push(clientData);
+                alert('¡Cliente registrado con éxito!');
+                document.getElementById('client-form').reset();
+            }
+
+            localStorage.setItem('intmex_history', JSON.stringify(history));
+            base64Photo = '';
+            document.getElementById('foto-preview-container').classList.add('hidden');
+            toggleClientFields();
+            updateClientDropdown();
+            loadHistory();
+            switchTab('historial');
+        }
+
+        function editClient(index) {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const item = history[index];
+            if(!item) return;
+
+            document.getElementById('edit-index').value = index;
+            document.getElementById('c-abierto').value = item.abierto || 'SÍ';
+            toggleClientFields();
+
+            document.getElementById('c-nombre').value = item.nombre || '';
+            document.getElementById('c-ruta').value = item.ruta || '';
+            if(item.abierto === 'NO') {
+                document.getElementById('c-tipo-cierre').value = item.tipoCierre || '';
+            } else {
+                document.getElementById('c-telefono').value = item.telefono || '';
+                document.getElementById('c-recibe').value = item.recibe || '';
+                document.getElementById('c-segmento').value = item.segmento || 'Tipo A';
+                document.getElementById('c-impacto').value = item.impacto || 'SÍ';
+                document.getElementById('c-compra').value = item.compra || 'SÍ';
+                const motSel = document.getElementById('c-motivo-no-compra');
+                Array.from(motSel.querySelectorAll('option[data-legacy]')).forEach(o => o.remove());
+                const motVal = (item.motivoNoCompra && item.motivoNoCompra !== 'N/A') ? item.motivoNoCompra : '';
+                if (motVal && !Array.from(motSel.options).some(o => o.value === motVal)) {
+                    const o = document.createElement('option'); o.value = motVal; o.textContent = motVal; o.setAttribute('data-legacy', '1'); motSel.appendChild(o);
+                }
+                motSel.value = motVal;
+                document.getElementById('c-codigos').value = item.codigos || '';
+                document.getElementById('c-notas').value = item.notas || '';
+                toggleClientFields();
+                if (item.compra === 'NO') document.getElementById('c-motivo-no-compra').value = motVal;
+            }
+
+            if(item.foto) {
+                base64Photo = item.foto;
+                document.getElementById('foto-preview').src = item.foto;
+                document.getElementById('foto-preview-container').classList.remove('hidden');
+            }
+
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modificar Registro de Cliente`;
+            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Actualizar Registro`;
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            switchTab('clientes');
+        }
+
+        function cancelEdit() {
+            document.getElementById('edit-index').value = '';
+            document.getElementById('client-form').reset();
+            base64Photo = '';
+            document.getElementById('foto-preview-container').classList.add('hidden');
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-user-plus"></i> 2. Alta de Cliente en Base de Datos`;
+            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Guardar Cliente en Reporte Ejecutivo`;
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            toggleClientFields();
+        }
+
+        function updateClientDropdown() {
+            const select = document.getElementById('supervision-client-select');
+            if(!select) return;
+            select.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            history.forEach(item => {
+                select.innerHTML += `<option value="${item.id}">${item.nombre} (${item.segmento || 'Cerrado'})${item.checklistScore !== undefined ? ' ✓ ' + item.checklistScore + '/10' : ''}</option>`;
+            });
+        }
+
+
+        function escHtml(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+        function scoreStatus(score10) {
+            if (score10 >= 8) return { txt: 'EXCELENTE', bg: '#d1fae5', fg: '#065f46', bd: '#10b981' };
+            if (score10 >= 6) return { txt: 'EN DESARROLLO', bg: '#fef3c7', fg: '#92400e', bd: '#f59e0b' };
+            return { txt: 'INEFICIENTE', bg: '#fee2e2', fg: '#991b1b', bd: '#ef4444' };
+        }
+        // La firma se dibuja en blanco sobre fondo transparente; se pasa a tinta oscura para el papel. Devuelve null si está vacía.
+        function prepSignature(dataUrl) {
+            return new Promise(resolve => {
+                if (!dataUrl) return resolve(null);
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+                        const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+                        const d = ctx.getImageData(0, 0, c.width, c.height).data;
+                        let ink = false; for (let i = 3; i < d.length; i += 4) { if (d[i] > 0) { ink = true; break; } }
+                        if (!ink) return resolve(null);
+                        ctx.globalCompositeOperation = 'source-in'; ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, c.width, c.height);
+                        resolve(c.toDataURL('image/png'));
+                    } catch (err) { resolve(null); }
+                };
+                img.onerror = () => resolve(null);
+                img.src = dataUrl;
+            });
+        }
+        function closeAdvisorReport() {
+            const el = document.getElementById('report-overlay'); if (el) el.remove();
+            document.body.classList.remove('printing-report');
+        }
+        async function generateAdvisorReport() {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const evaluated = history.filter(i => i.checklistScore !== undefined);
+            if (!evaluated.length) { alert('Todavía no hay supervisiones finalizadas. Completa al menos una en la pestaña Supervisión.'); return; }
+            const route = JSON.parse(localStorage.getItem('intmex_route_data') || '{}');
+
+            // Calificación
+            const avg = evaluated.reduce((a, i) => a + i.checklistScore, 0) / evaluated.length;
+            const st = scoreStatus(avg);
+
+            // Desempeño de la jornada
+            const total = history.length;
+            const pct = n => total ? ((n / total) * 100).toFixed(1) + '%' : '0.0%';
+            const abiertos = history.filter(i => i.abierto === 'SÍ').length;
+            const compra = history.filter(i => i.compra === 'SÍ').length;
+            const impacto = history.filter(i => i.impacto === 'SÍ').length;
+            const seg = l => history.filter(i => i.segmento && i.segmento.startsWith('Tipo ' + l)).length;
+
+            // Cumplimiento por paso del checklist
+            const stepRows = checklistSteps.map(step => {
+                const withDet = evaluated.filter(i => i.checklistDetails);
+                const yes = withDet.filter(i => i.checklistDetails[step] === 'SÍ').length;
+                const n = withDet.length;
+                return { step, yes, no: n - yes, n, pct: n ? (yes / n) * 100 : 0 };
+            });
+            const opp = stepRows.filter(r => r.no > 0).sort((a, b) => a.pct - b.pct);
+
+            // Firmas: firma única capturada al finalizar la supervisión (si no existe, se usan las de la supervisión más reciente de datos anteriores)
+            let asesorSig = null, supervisorSig = null, sigNote = '', sigWarn = '';
+            const fin = JSON.parse(localStorage.getItem('intmex_final_sig') || 'null');
+            if (fin) {
+                asesorSig = await prepSignature(fin.asesorSig);
+                supervisorSig = await prepSignature(fin.supervisorSig);
+                sigNote = 'Firmas capturadas al finalizar la supervisión el ' + new Date(fin.ts).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' });
+                const late = evaluated.filter(i => (i.supervisionTs || 0) > fin.ts).length;
+                if (late) sigWarn = `Nota: ${late} supervisión(es) se guardaron después de la firma.`;
+            } else {
+                const signedItems = evaluated.map((it, idx) => ({ it, idx })).sort((a, b) => ((a.it.supervisionTs || 0) - (b.it.supervisionTs || 0)) || (a.idx - b.idx));
+                let sigClient = '';
+                for (let k = signedItems.length - 1; k >= 0 && !(asesorSig && supervisorSig); k--) {
+                    const it = signedItems[k].it;
+                    const a2 = await prepSignature(it.asesorSig), v2 = await prepSignature(it.supervisorSig);
+                    if (!asesorSig && a2) { asesorSig = a2; sigClient = sigClient || it.nombre; }
+                    if (!supervisorSig && v2) { supervisorSig = v2; sigClient = sigClient || it.nombre; }
+                }
+                sigNote = sigClient ? `Firmas de la supervisión más reciente (cliente: ${sigClient}).` : 'Firmas pendientes: la supervisión aún no se ha finalizado.';
+            }
+
+            const cedisSel = document.getElementById('f-cedis');
+            const cedisOpt = Array.from(cedisSel.options).find(o => o.value === route.cedis);
+            const cedisTxt = cedisOpt ? cedisOpt.text : (route.cedis || '—');
+            const objetivo = (route.objetivo || '—') + (route.subObjetivo ? ' – ' + route.subObjetivo : '');
+            const logoSrc = (document.querySelector('header img') || {}).src || '';
+            const fecha = new Date().toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' });
+            const th = 'border border-slate-300 bg-slate-100 px-2 py-1.5 text-left text-xs font-bold';
+            const td = 'border border-slate-300 px-2 py-1.5 text-sm';
+
+            const oppHtml = opp.length ? `<table class="w-full border-collapse mt-2"><thead><tr><th class="${th}">Paso del checklist</th><th class="${th}" style="width:140px">Evaluaciones con fallo</th><th class="${th}" style="width:110px">Cumplimiento</th></tr></thead><tbody>${
+                opp.map(r => `<tr><td class="${td}">${escHtml(r.step)}</td><td class="${td}">${r.no} de ${r.n}</td><td class="${td}" style="font-weight:700;color:${r.pct < 60 ? '#b91c1c' : r.pct < 80 ? '#b45309' : '#047857'}">${r.pct.toFixed(0)}%</td></tr>`).join('')
+            }</tbody></table>` : '<p class="text-sm mt-2">Sin áreas de oportunidad: todos los pasos del checklist se cumplieron en todas las evaluaciones.</p>';
+
+            const clientRows = evaluated.map(i => { const s2 = scoreStatus(i.checklistScore); return `<tr><td class="${td}">${escHtml(i.nombre)}</td><td class="${td}">${escHtml(i.timestamp || '')}</td><td class="${td}" style="font-weight:700">${i.checklistScore}/10</td><td class="${td}"><span style="color:${s2.fg};font-weight:700">${s2.txt}</span></td></tr>`; }).join('');
+
+            const sigBox = (title, src) => `<div class="break-avoid" style="flex:1;min-width:220px;text-align:center"><div style="height:90px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1.5px solid #0f172a">${src ? `<img src="${src}" style="max-height:86px;max-width:100%">` : '<span style="color:#94a3b8;font-size:12px;padding-bottom:6px">Sin firma capturada</span>'}</div><p style="font-size:12px;font-weight:700;margin-top:4px">${title}</p></div>`;
+
+            closeAdvisorReport();
+            const html = `
+            <div id="report-overlay" class="fixed inset-0 z-[3000] overflow-auto bg-slate-300">
+                <div class="no-print sticky top-0 z-10 bg-slate-900 text-white px-4 py-2 flex items-center justify-between gap-2 shadow">
+                    <span class="text-sm font-semibold"><i class="fa-solid fa-file-lines mr-2"></i>Reporte del Asesor</span>
+                    <div class="flex gap-2">
+                        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa-solid fa-print mr-1"></i> Imprimir / PDF</button>
+                        <button onclick="closeAdvisorReport()" class="bg-slate-700 hover:bg-slate-600 text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa-solid fa-xmark mr-1"></i> Cerrar</button>
+                    </div>
+                </div>
+                <div class="max-w-4xl mx-auto bg-white text-slate-900 p-6 md:p-10 my-4 shadow-xl">
+                    <div class="flex items-center gap-4 border-b-2 border-slate-800 pb-3 mb-4">
+                        ${logoSrc ? `<img src="${logoSrc}" alt="INTMEX" style="width:64px;height:64px;border-radius:9999px">` : ''}
+                        <div>
+                            <h1 class="text-xl font-black tracking-wide">REPORTE DE SUPERVISIÓN AL ASESOR</h1>
+                            <p class="text-xs text-slate-600">INTMEX · Generado el ${escHtml(fecha)}</p>
+                        </div>
+                    </div>
+
+                    <table class="w-full border-collapse mb-5 break-avoid"><tbody>
+                        <tr><td class="${td}"><b>Asesor:</b> ${escHtml(route.asesor || '—')}</td><td class="${td}"><b>CEDIS:</b> ${escHtml(cedisTxt)}</td></tr>
+                        <tr><td class="${td}"><b>Ruta:</b> ${escHtml(route.ruta || '—')} (${escHtml(route.tipoRuta || '—')})</td><td class="${td}"><b>Objetivo:</b> ${escHtml(objetivo)}</td></tr>
+                    </tbody></table>
+
+                    <h2 class="text-sm font-black uppercase tracking-wider mb-2">1. Calificación del asesor</h2>
+                    <div class="break-avoid mb-5" style="display:flex;align-items:center;gap:16px;border:2px solid ${st.bd};background:${st.bg};color:${st.fg};border-radius:10px;padding:12px 16px">
+                        <div style="font-size:34px;font-weight:900;line-height:1">${avg.toFixed(1)}<span style="font-size:16px"> / 10</span></div>
+                        <div><div style="font-weight:800;font-size:15px">${st.txt}</div><div style="font-size:12px">Promedio de aciertos en ${evaluated.length} supervisión(es) · ${(avg * 10).toFixed(0)}% de cumplimiento</div></div>
+                    </div>
+
+                    <h2 class="text-sm font-black uppercase tracking-wider mb-2">2. Desempeño de la jornada</h2>
+                    <table class="w-full border-collapse mb-5 break-avoid"><thead><tr><th class="${th}">Total visitas</th><th class="${th}">Clientes abiertos</th><th class="${th}">Compra efectiva</th><th class="${th}">Impacto prioridades</th><th class="${th}">Segmentos A / B / C / D</th></tr></thead>
+                    <tbody><tr><td class="${td}">${total}</td><td class="${td}">${pct(abiertos)}</td><td class="${td}">${pct(compra)}</td><td class="${td}">${pct(impacto)}</td><td class="${td}">${seg('A')} / ${seg('B')} / ${seg('C')} / ${seg('D')}</td></tr></tbody></table>
+
+                    <h2 class="text-sm font-black uppercase tracking-wider mb-1">3. Áreas de oportunidad</h2>
+                    <div class="mb-5 break-avoid">${oppHtml}</div>
+
+                    <h2 class="text-sm font-black uppercase tracking-wider mb-2">4. Detalle por cliente supervisado</h2>
+                    <table class="w-full border-collapse mb-6"><thead><tr><th class="${th}">Cliente</th><th class="${th}">Fecha de visita</th><th class="${th}" style="width:80px">Calificación</th><th class="${th}">Estatus</th></tr></thead><tbody>${clientRows}</tbody></table>
+
+                    <h2 class="text-sm font-black uppercase tracking-wider mb-2">5. Firmas</h2>
+                    <div class="break-avoid" style="display:flex;gap:40px;flex-wrap:wrap;margin-top:8px">
+                        ${sigBox('Firma del Asesor' + (route.asesor ? ' – ' + escHtml(route.asesor) : ''), asesorSig)}
+                        ${sigBox('Firma del Supervisor', supervisorSig)}
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-2">${escHtml(sigNote)}</p>${sigWarn ? `<p class="text-[11px] mt-1" style="color:#b45309;font-weight:700">${escHtml(sigWarn)}</p>` : ''}
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+            document.body.classList.add('printing-report');
+            const ov = document.getElementById('report-overlay'); if (ov) ov.scrollTop = 0;
+        }
+
+        function submitSupervision(e) {
+            e.preventDefault();
+            const clientId = document.getElementById('supervision-client-select').value;
+            if(!clientId) { alert('Seleccione un cliente para asociar la supervisión.'); return; }
+            
+            let scoredYes = 0;
+            const checklistResults = {};
+            checklistSteps.forEach((step, idx) => {
+                const val = checkValues[idx] || 'NO';
+                checklistResults[step] = val;
+                if(val === 'SÍ') scoredYes++;
+            });
+
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const client = history.find(i => i.id === clientId);
+            if(client) {
+                client.checklistScore = scoredYes;
+                client.checklistDetails = checklistResults;
+                client.supervisionTs = Date.now();
+                localStorage.setItem('intmex_history', JSON.stringify(history));
+                alert(`Supervisión guardada: ${client.nombre}. Calificación: ${scoredYes} / 10`);
+                loadHistory();
+                updateClientDropdown();
+                Object.keys(checkValues).forEach(k => delete checkValues[k]);
+                initChecklist();
+                updateSupervisionSummary();
+            }
+        }
+
+        function updateSupervisionSummary() {
+            const el = document.getElementById('sup-summary'); if (!el) return;
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const evaluated = history.filter(i => i.checklistScore !== undefined);
+            const fin = JSON.parse(localStorage.getItem('intmex_final_sig') || 'null');
+            let txt = `Supervisiones guardadas: ${evaluated.length}`;
+            if (fin) {
+                txt += ` · Firmado el ${new Date(fin.ts).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}`;
+                if (evaluated.some(i => (i.supervisionTs || 0) > fin.ts)) txt += ' · Hay supervisiones guardadas después de la firma: vuelve a finalizar para incluirlas.';
+            } else if (evaluated.length) { txt += ' · Pendiente de firma (presiona Finalizar Supervisión al terminar).'; }
+            el.innerText = txt;
+        }
+        function sizeSignaturePads() {
+            ['asesor-sig-pad', 'supervisor-sig-pad'].forEach(id => {
+                const pad = document.getElementById(id), w = pad.parentElement.clientWidth;
+                if (w && pad.width !== w) { pad.width = w; pad.height = 120; const c = pad.getContext('2d'); c.strokeStyle = '#ffffff'; c.lineWidth = 2; }
+            });
+        }
+        function isPadBlank(id) {
+            const pad = document.getElementById(id);
+            if (!pad.width || !pad.height) return true;
+            const d = pad.getContext('2d').getImageData(0, 0, pad.width, pad.height).data;
+            for (let i = 3; i < d.length; i += 4) { if (d[i] > 0) return false; }
+            return true;
+        }
+        function openFinalizePanel() {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            if (!history.some(i => i.checklistScore !== undefined)) { alert('Primero guarda al menos una supervisión.'); return; }
+            document.getElementById('finalize-panel').classList.remove('hidden');
+            document.getElementById('btn-open-finalize').classList.add('hidden');
+            sizeSignaturePads();
+            clearSig('asesor-sig-pad'); clearSig('supervisor-sig-pad');
+            document.getElementById('finalize-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        function cancelFinalize() {
+            document.getElementById('finalize-panel').classList.add('hidden');
+            document.getElementById('btn-open-finalize').classList.remove('hidden');
+        }
+        function confirmFinalize() {
+            const faltan = [];
+            if (isPadBlank('asesor-sig-pad')) faltan.push('del asesor');
+            if (isPadBlank('supervisor-sig-pad')) faltan.push('del supervisor');
+            if (faltan.length) { alert('Falta la firma ' + faltan.join(' y ') + '.'); return; }
+            localStorage.setItem('intmex_final_sig', JSON.stringify({
+                asesorSig: document.getElementById('asesor-sig-pad').toDataURL(),
+                supervisorSig: document.getElementById('supervisor-sig-pad').toDataURL(),
+                ts: Date.now()
+            }));
+            clearSig('asesor-sig-pad'); clearSig('supervisor-sig-pad');
+            cancelFinalize();
+            updateSupervisionSummary();
+            alert('Supervisión finalizada. Las firmas se agregaron al Reporte del Asesor.');
+            loadHistory();
+            switchTab('historial');
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            const container = document.getElementById('history-container');
+            
+            document.getElementById('metric-total').innerText = history.length;
+            if(history.length > 0) {
+                const abiertosCount = history.filter(i => i.abierto === 'SÍ').length;
+                const compraCount = history.filter(i => i.compra === 'SÍ').length;
+                const impactoCount = history.filter(i => i.impacto === 'SÍ').length;
+                
+                document.getElementById('metric-abiertos').innerText = ((abiertosCount / history.length) * 100).toFixed(1) + '%';
+                document.getElementById('metric-compra').innerText = ((compraCount / history.length) * 100).toFixed(1) + '%';
+                document.getElementById('metric-impacto').innerText = ((impactoCount / history.length) * 100).toFixed(1) + '%';
+                
+                document.getElementById('seg-a').innerText = history.filter(i => i.segmento && i.segmento.startsWith('Tipo A')).length;
+                document.getElementById('seg-b').innerText = history.filter(i => i.segmento && i.segmento.startsWith('Tipo B')).length;
+                document.getElementById('seg-c').innerText = history.filter(i => i.segmento && i.segmento.startsWith('Tipo C')).length;
+                document.getElementById('seg-d').innerText = history.filter(i => i.segmento && i.segmento.startsWith('Tipo D')).length;
+
+                const fallosMap = {};
+                history.forEach(item => {
+                    if(item.checklistDetails) {
+                        for(let step in item.checklistDetails) {
+                            if(item.checklistDetails[step] === 'NO') {
+                                fallosMap[step] = (fallosMap[step] || 0) + 1;
+                            }
+                        }
+                    }
+                });
+
+                const fallosListEl = document.getElementById('eval-fallos-list');
+                fallosListEl.innerHTML = '';
+                const sortedFallos = Object.entries(fallosMap).sort((a,b) => b[1] - a[1]);
+                if(sortedFallos.length > 0) {
+                    sortedFallos.forEach(([step, count]) => {
+                        fallosListEl.innerHTML += `<li><b>${step}:</b> ${count} incidencias de fallo detectadas</li>`;
+                    });
+                } else {
+                    fallosListEl.innerHTML = `<li>Sin áreas de oportunidad críticas reportadas.</li>`;
+                }
+
+                const itemsWithChecklist = history.filter(i => i.checklistScore !== undefined);
+                if(itemsWithChecklist.length > 0) {
+                    const avgScore = itemsWithChecklist.reduce((acc, curr) => acc + curr.checklistScore, 0) / itemsWithChecklist.length;
+                    document.getElementById('eval-score').innerText = `Promedio de Aciertos en Checklist: ${avgScore.toFixed(1)} / 10 (Evaluaciones: ${itemsWithChecklist.length})`;
+                    const statusEl = document.getElementById('eval-status');
+                    if(avgScore >= 8) {
+                        statusEl.className = "bg-emerald-950/80 border border-emerald-600 text-emerald-300 text-xs font-bold px-3 py-2 rounded-lg mb-3 inline-block";
+                        statusEl.innerText = "Estatus de Desempeño: EXCELENTE";
+                    } else if(avgScore >= 6) {
+                        statusEl.className = "bg-amber-950/80 border border-amber-600 text-amber-300 text-xs font-bold px-3 py-2 rounded-lg mb-3 inline-block";
+                        statusEl.innerText = "Estatus de Desempeño: EN DESARROLLO";
+                    } else {
+                        statusEl.className = "bg-red-950/80 border border-red-600 text-red-300 text-xs font-bold px-3 py-2 rounded-lg mb-3 inline-block";
+                        statusEl.innerText = "Estatus de Desempeño: INEFICIENTE";
+                    }
+                }
+            }
+
+            if(history.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">No hay registros guardados todavía.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            history.slice().reverse().forEach((item, revIdx) => {
+                const actualIdx = history.length - 1 - revIdx;
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl shadow space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-white text-sm">${item.nombre}</h4>
+                                <span class="text-xs text-slate-400">${item.segmento || 'Cerrado'}${item.ruta ? ' • Ruta: ' + item.ruta : ''} • Registrado: ${item.timestamp}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs px-2 py-1 rounded bg-slate-800 text-blue-400 border border-slate-700">Abierto: ${item.abierto}</span>
+                                <button onclick="editClient(${actualIdx})" class="no-print bg-amber-600 hover:bg-amber-700 text-white text-xs px-2.5 py-1 rounded font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-pen"></i> Modificar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-300 pt-2 border-t border-slate-800">
+                            <div><b>Tipo Cierre:</b> ${item.tipoCierre || 'N/D'}</div>
+                            <div><b>Atiende:</b> ${item.recibe || 'N/D'}</div>
+                            <div><b>Compra Efectiva:</b> ${item.compra || 'N/D'}</div>
+                            <div><b>Motivo No Compra:</b> ${item.motivoNoCompra || 'N/D'}</div>
+                            <div><b>Impacto Prioridades:</b> ${item.impacto || 'N/D'}</div>
+                            <div><b>Checklist Score:</b> ${item.checklistScore !== undefined ? item.checklistScore + '/10' : 'Pendiente'}</div>
+                            <div><b>Códigos:</b> ${item.codigos || 'Ninguno'}</div>
+                            <div><b>Notas:</b> ${item.notas || 'Ninguna'}</div>
+                        </div>
+                        ${item.foto ? `<div class="mt-2"><span class="text-xs text-slate-400 block mb-1">Evidencia Fotográfica:</span><img src="${item.foto}" class="w-24 h-24 object-cover rounded border border-slate-700"></div>` : ''}
+                        ${item.asesorSig || item.supervisorSig ? `
+                            <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-800 text-xs">
+                                <div><span class="text-slate-400 block mb-1">Firma Asesor:</span>${item.asesorSig ? `<img src="${item.asesorSig}" class="h-16 bg-slate-950 border border-slate-700 rounded">` : 'Sin firma'}</div>
+                                <div><span class="text-slate-400 block mb-1">Firma Supervisor:</span>${item.supervisorSig ? `<img src="${item.supervisorSig}" class="h-16 bg-slate-950 border border-slate-700 rounded">` : 'Sin firma'}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        function startCorrectPin(clientId) {
+            revertPendingMarker(); pendingFromDrag = false; pendingNewLat = pendingNewLng = null;
+            const fc = document.getElementById('floating-confirm-container'); if (fc) fc.remove();
+            const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+            clientBeingCorrected = history.find(i => i.id === clientId);
+            if(clientBeingCorrected) {
+                switchTab('mapa');
+                document.getElementById('map-instruction-text').innerHTML = `<i class="fa-solid fa-location-crosshairs animate-pulse text-amber-400"></i> Mueve/Haz clic en el mapa para ubicar la nueva posición correcta de <b>${clientBeingCorrected.nombre}</b>.`;
+            }
+        }
+
+        function showFloatingConfirmButton(msg) {
+            let btnContainer = document.getElementById('floating-confirm-container');
+            if(!btnContainer) {
+                btnContainer = document.createElement('div');
+                btnContainer.id = 'floating-confirm-container';
+                btnContainer.className = 'absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[1000] bg-slate-900 border border-amber-500 p-3 rounded-xl shadow-2xl flex items-center gap-3';
+                document.getElementById('tab-mapa').appendChild(btnContainer);
+            }
+            btnContainer.innerHTML = `
+                <span class="text-xs text-slate-200 font-medium">${msg}</span>
+                <button onclick="confirmNewPinPosition()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow">Guardar Nueva Ubicación</button>
+                <button onclick="cancelNewPinPosition()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded shadow">Cancelar</button>
+            `;
+        }
+
+        function confirmNewPinPosition() {
+            if(clientBeingCorrected && pendingNewLat !== null) {
+                const history = JSON.parse(localStorage.getItem('intmex_history') || '[]');
+                const target = history.find(i => i.id === clientBeingCorrected.id);
+                if(target) {
+                    target.lat = pendingNewLat;
+                    target.lng = pendingNewLng;
+                    localStorage.setItem('intmex_history', JSON.stringify(history));
+                    alert('¡Ubicación del cliente actualizada con éxito!');
+                }
+            }
+            cancelNewPinPosition();
+            updateMapMarkers();
+        }
+
+        function cancelNewPinPosition() {
+            revertPendingMarker(); pendingFromDrag = false;
+            clientBeingCorrected = null;
+            pendingNewLat = null;
+            pendingNewLng = null;
+            const btnContainer = document.getElementById('floating-confirm-container');
+            if(btnContainer) btnContainer.remove();
+            document.getElementById('map-instruction-text').innerHTML = `<i class="fa-solid fa-circle-info"></i> Arrastra un pin para corregir su ubicación, o tócalo para ver sus datos y editarlos.`;
+        }
+    </script>
+</body>
+</html>
