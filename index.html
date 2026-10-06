@@ -24,7 +24,7 @@
             z-index: 1050;
             display: flex;
             justify-content: space-around;
-            padding: 8px 4px;
+            padding: 10px 4px;
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.3);
         }
         @media print {
@@ -36,11 +36,11 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-24">
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-28">
 
     <!-- Header con Logotipo e Identidad -->
     <header class="no-print bg-slate-800 border-b border-slate-700 py-3 px-6 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow border-2 border-blue-400 overflow-hidden flex-shrink-0">
                     <img src="logo.png" alt="INTMEX Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentNode.innerHTML='INT';">
@@ -50,13 +50,16 @@
                     <p class="text-xs text-slate-400">Panel Ejecutivo Gerencial | Control de Campo y Auditoría</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 mt-2 md:mt-0 flex-wrap">
-                <button onclick="toggleRescuePanel()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Panel de Rescate
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="switchTab('resumen')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-contract"></i> Ver Reporte y Fotos
                 </button>
-                <div id="gps-status" class="bg-emerald-900/60 border border-emerald-500 text-emerald-300 text-xs px-3 py-1.5 rounded-full flex items-center gap-2">
+                <button onclick="toggleRescuePanel()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Respaldo
+                </button>
+                <div id="gps-status" class="bg-emerald-900/60 border border-emerald-500 text-emerald-300 text-xs px-3 py-2 rounded-lg flex items-center gap-2">
                     <i class="fa-solid fa-location-dot animate-pulse"></i>
-                    <span id="gps-text">GPS Activo (Calibrado)</span>
+                    <span id="gps-text">GPS Activo</span>
                 </div>
             </div>
         </div>
@@ -198,4 +201,667 @@
                     </div>
                     <div class="conditional-field">
                         <label class="block text-xs text-slate-400 mb-1">¿Compra Efectiva?</label>
-                        <select id="c-compra" onchange="toggleClientFields
+                        <select id="c-compra" onchange="toggleClientFields()" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="SÍ">SÍ</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </div>
+                    <div id="wrapper-motivo-no-compra" style="display: none;">
+                        <label class="block text-xs text-amber-400 mb-1 font-bold">Motivo No Compra</label>
+                        <select id="c-motivo-no-compra" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="Sin dinero">Sin dinero</option>
+                            <option value="Con inventario">Con inventario</option>
+                            <option value="No esta el encargado">No esta el encargado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="conditional-field grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Códigos sin Impactar / Comentarios</label>
+                        <textarea id="c-codigos" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">Ninguno</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Notas de Auditoría</label>
+                        <textarea id="c-notas" rows="2" placeholder="Observaciones adicionales..." class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200"></textarea>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg">
+                    <label class="block text-xs text-amber-400 mb-1 font-bold">
+                        <i class="fa-solid fa-camera"></i> Foto de Fachada o Negocio (Abre Cámara Directa)
+                    </label>
+                    <input type="file" id="c-foto" accept="image/*" capture="environment" onchange="previewImage(event)" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                    <div id="foto-preview-container" class="mt-2 hidden">
+                        <img id="foto-preview" class="w-32 h-32 object-cover rounded border border-slate-600" alt="Vista previa">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center">
+                    <button type="button" id="cancel-edit-btn" onclick="cancelEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-white font-medium px-4 py-2 rounded-lg text-xs">Cancelar Edición</button>
+                    <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition flex items-center gap-2 text-sm ml-auto">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cliente en Reporte Ejecutivo
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 3: SUPERVISION -->
+        <div id="tab-supervision" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-12">
+            <h2 class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list"></i> Supervisión y Evaluación (10 Pasos Reales de Visita)
+            </h2>
+            <div class="mb-6 p-4 bg-slate-900 border border-slate-700 rounded-lg">
+                <label class="block text-xs text-slate-400 mb-2 font-semibold uppercase">Seleccionar Cliente a Evaluar:</label>
+                <select id="supervision-client-select" class="w-full bg-slate-800 border border-slate-600 rounded p-2.5 text-sm text-slate-200">
+                    <option value="">-- Seleccione un cliente --</option>
+                </select>
+            </div>
+            <form id="supervision-form" onsubmit="submitSupervision(event)" class="space-y-3">
+                <div id="checklist-10pasos" class="space-y-2"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-700 mt-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Comentarios Generales de Supervisión</label>
+                        <textarea id="sup-comentarios" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200" placeholder="Escriba observaciones de campo..."></textarea>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs text-slate-300 font-bold mb-1">Firma del Asesor (Conformidad)</label>
+                            <div class="bg-slate-900 p-1.5 rounded border border-slate-700">
+                                <canvas id="signature-asesor" class="signature-pad"></canvas>
+                                <button type="button" onclick="clearSignature('asesor')" class="mt-0.5 text-[10px] text-red-400 hover:underline">Limpiar Firma Asesor</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 font-bold mb-1">Firma del Supervisor (Autorización)</label>
+                            <div class="bg-slate-900 p-1.5 rounded border border-slate-700">
+                                <canvas id="signature-supervisor" class="signature-pad"></canvas>
+                                <button type="button" onclick="clearSignature('supervisor')" class="mt-0.5 text-[10px] text-red-400 hover:underline">Limpiar Firma Supervisor</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm flex items-center gap-2 mt-4">
+                    <i class="fa-solid fa-check"></i> Guardar Evaluación y Firmas
+                </button>
+            </form>
+        </div>
+
+        <!-- TAB 4: MAPA Y GEOLOCALIZACION -->
+        <div id="tab-mapa" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-12">
+            <h2 class="text-lg font-semibold text-blue-400 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-map-location-dot"></i> Mapa Interactivo y Calibrador GPS
+            </h2>
+            <p class="text-xs text-slate-400 mb-4">Si el GPS presenta desfase, arrastre el marcador en el mapa o ajuste los valores numéricos para corregir la posición actual de registro.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Latitud GPS</label>
+                    <input type="text" id="gps-lat" class="w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-slate-200" readonly>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Longitud GPS</label>
+                    <input type="text" id="gps-lng" class="w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-slate-200" readonly>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="button" onclick="calibrarGpsActual()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-1.5 px-3 rounded shadow">
+                        <i class="fa-solid fa-crosshairs"></i> Forzar Actualización GPS
+                    </button>
+                </div>
+            </div>
+
+            <div id="map"></div>
+        </div>
+
+        <!-- TAB 5: RESUMEN, HISTORIAL Y REPORTE EJECUTIVO GLOBAL -->
+        <div id="tab-resumen" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-12 print-container">
+            <h2 class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2 no-print">
+                <i class="fa-solid fa-file-contract"></i> Resumen, Calificación de Desempeño e Historial Global con Fotos
+            </h2>
+            <div id="summary-content" class="space-y-6">
+                <!-- Se llena dinámicamente con fotos de fachada y firmas -->
+            </div>
+            <div class="mt-6 flex flex-wrap gap-3 no-print">
+                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Imprimir / Guardar Reporte PDF
+                </button>
+                <button onclick="exportToCSV()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel"></i> Descargar Excel (My Maps)
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- BARRA DE NAVEGACION INFERIOR FIJA -->
+    <nav class="bottom-nav no-print">
+        <button onclick="switchTab('clientes')" id="nav-clientes" class="flex flex-col items-center text-blue-400 text-xs py-1 px-3 transition">
+            <i class="fa-solid fa-user-plus text-base mb-0.5"></i>
+            <span>Clientes</span>
+        </button>
+        <button onclick="switchTab('supervision')" id="nav-supervision" class="flex flex-col items-center text-slate-400 text-xs py-1 px-3 transition hover:text-slate-200">
+            <i class="fa-solid fa-clipboard-list text-base mb-0.5"></i>
+            <span>Supervisión</span>
+        </button>
+        <button onclick="switchTab('mapa')" id="nav-mapa" class="flex flex-col items-center text-slate-400 text-xs py-1 px-3 transition hover:text-slate-200">
+            <i class="fa-solid fa-map-location-dot text-base mb-0.5"></i>
+            <span>Mapa GPS</span>
+        </button>
+        <button onclick="switchTab('resumen')" id="nav-resumen" class="flex flex-col items-center text-slate-400 text-xs py-1 px-3 transition hover:text-slate-200">
+            <i class="fa-solid fa-file-contract text-base mb-0.5"></i>
+            <span>Resumen y Fotos</span>
+        </button>
+    </nav>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        function generarRutasCedis() {
+            const rutas = [];
+            for (let i = 1; i <= 18; i++) {
+                let num = i < 10 ? '0' + i : i;
+                rutas.push('R-' + num);
+            }
+            for (let i = 301; i <= 306; i++) {
+                rutas.push('R-' + i);
+            }
+            return rutas;
+        }
+
+        const listaRutasBase = generarRutasCedis();
+        const rutasPorCedis = {
+            'TIJ': listaRutasBase.map(r => r.replace('R-', 'TIJ')),
+            'MXLI': listaRutasBase.map(r => r.replace('R-', 'MXLI')),
+            'HILLO': listaRutasBase.map(r => r.replace('R-', 'HILLO')),
+            'MOC': listaRutasBase.map(r => r.replace('R-', 'MOC')),
+            'CUL': listaRutasBase.map(r => r.replace('R-', 'CUL')),
+            'MZT': listaRutasBase.map(r => r.replace('R-', 'MZT'))
+        };
+
+        const pasos10 = [
+            "1. ID cliente en base de datos",
+            "2. Saludo al cliente",
+            "3. ID nuestras marcas",
+            "4. ID stock suficiente",
+            "5. Caducidades (FIFO)",
+            "6. Impulso de variantes",
+            "7. Cierre promos",
+            "8. Comunicar venta a cliente",
+            "9. Manejo de objeciones",
+            "10. Despedida"
+        ];
+
+        let currentImageData = '';
+        let clients = JSON.parse(localStorage.getItem('intmex_clients') || '[]');
+        let routeData = JSON.parse(localStorage.getItem('intmex_routedata') || '{}');
+        let supervisionData = JSON.parse(localStorage.getItem('intmex_supervision') || '{}');
+        let map, markersLayer, currentGPSMarker;
+        let gpsCoords = [32.5149, -117.0382];
+
+        function initSignaturePad(id) {
+            const canvas = document.getElementById('signature-' + id);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+
+            let drawing = false;
+
+            canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+            canvas.onmousemove = (e) => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+            canvas.onmouseup = () => { drawing = false; saveSignatures(); };
+            canvas.onmouseleave = () => { drawing = false; };
+
+            canvas.ontouchstart = (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                drawing = true;
+                ctx.beginPath();
+                ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+            };
+            canvas.ontouchmove = (e) => {
+                e.preventDefault();
+                if(!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                ctx.stroke();
+            };
+            canvas.ontouchend = () => { drawing = false; saveSignatures(); };
+        }
+
+        function saveSignatures() {
+            const cAsesor = document.getElementById('signature-asesor');
+            const cSup = document.getElementById('signature-supervisor');
+            if(cAsesor) supervisionData.signatureAsesor = cAsesor.toDataURL();
+            if(cSup) supervisionData.signatureSupervisor = cSup.toDataURL();
+            localStorage.setItem('intmex_supervision', JSON.stringify(supervisionData));
+        }
+
+        function clearSignature(type) {
+            const canvas = document.getElementById('signature-' + type);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(type === 'asesor') delete supervisionData.signatureAsesor;
+            if(type === 'supervisor') delete supervisionData.signatureSupervisor;
+            localStorage.setItem('intmex_supervision', JSON.stringify(supervisionData));
+        }
+
+        function initChecklist10Pasos() {
+            const container = document.getElementById('checklist-10pasos');
+            if(!container) return;
+            container.innerHTML = '';
+            pasos10.forEach((paso, idx) => {
+                const valGuardado = supervisionData.pasos ? supervisionData.pasos[idx] || 'Cumple' : 'Cumple';
+                container.innerHTML += `
+                    <div class="bg-slate-900 p-2.5 rounded border border-slate-700 flex justify-between items-center text-xs">
+                        <span class="text-slate-200 font-medium">${paso}</span>
+                        <select id="paso-${idx}" onchange="saveSupervisionData()" class="bg-slate-800 border border-slate-600 rounded p-1 text-xs text-slate-200">
+                            <option value="Cumple" ${valGuardado==='Cumple'?'selected':''}>Cumple</option>
+                            <option value="No Cumple" ${valGuardado==='No Cumple'?'selected':''}>No Cumple</option>
+                            <option value="N/A" ${valGuardado==='N/A'?'selected':''}>N/A</option>
+                        </select>
+                    </div>`;
+            });
+        }
+
+        function saveSupervisionData() {
+            const pasos = [];
+            for (let i = 0; i < 10; i++) {
+                const sel = document.getElementById(`paso-${i}`);
+                pasos.push(sel ? sel.value : 'Cumple');
+            }
+            supervisionData.pasos = pasos;
+            supervisionData.comentarios = document.getElementById('sup-comentarios').value;
+            supervisionData.clienteIndex = document.getElementById('supervision-client-select').value;
+            localStorage.setItem('intmex_supervision', JSON.stringify(supervisionData));
+        }
+
+        function loadSupervisionData() {
+            initChecklist10Pasos();
+            if(supervisionData.comentarios) {
+                document.getElementById('sup-comentarios').value = supervisionData.comentarios;
+            }
+            if(supervisionData.clienteIndex !== undefined) {
+                document.getElementById('supervision-client-select').value = supervisionData.clienteIndex;
+            }
+        }
+
+        function onCedisChange() {
+            const cedis = document.getElementById('f-cedis').value;
+            const rutaSelect = document.getElementById('f-ruta');
+            rutaSelect.innerHTML = '<option value="">Seleccione Ruta</option>';
+            if(rutasPorCedis[cedis]) {
+                rutasPorCedis[cedis].forEach(r => {
+                    rutaSelect.innerHTML += `<option value="${r}">${r}</option>`;
+                });
+            }
+            saveRouteData();
+        }
+
+        function saveRouteData() {
+            routeData = {
+                cedis: document.getElementById('f-cedis').value,
+                ruta: document.getElementById('f-ruta').value,
+                asesor: document.getElementById('f-asesor').value,
+                supervisor: document.getElementById('f-supervisor').value,
+                tipoRuta: document.getElementById('f-tipo-ruta').value,
+                objetivo: document.getElementById('f-objetivo').value
+            };
+            localStorage.setItem('intmex_routedata', JSON.stringify(routeData));
+        }
+
+        function loadRouteData() {
+            if(routeData.cedis) {
+                document.getElementById('f-cedis').value = routeData.cedis;
+                onCedisChange();
+                document.getElementById('f-ruta').value = routeData.ruta || '';
+                document.getElementById('f-asesor').value = routeData.asesor || '';
+                document.getElementById('f-supervisor').value = routeData.supervisor || '';
+                document.getElementById('f-tipo-ruta').value = routeData.tipoRuta || 'Ruta Activa';
+                document.getElementById('f-objetivo').value = routeData.objetivo || '';
+            }
+        }
+
+        function toggleClientFields() {
+            const abierto = document.getElementById('c-abierto').value;
+            const compra = document.getElementById('c-compra').value;
+            const conditionalFields = document.querySelectorAll('.conditional-field');
+            const wrapperTipoCierre = document.getElementById('wrapper-tipo-cierre');
+            const wrapperMotivoNoCompra = document.getElementById('wrapper-motivo-no-compra');
+
+            if (abierto === 'NO') {
+                conditionalFields.forEach(el => el.style.display = 'none');
+                wrapperTipoCierre.style.display = 'block';
+                wrapperMotivoNoCompra.style.display = 'none';
+            } else {
+                wrapperTipoCierre.style.display = 'none';
+                conditionalFields.forEach(el => el.style.display = 'block');
+                if (compra === 'NO') {
+                    wrapperMotivoNoCompra.style.display = 'block';
+                } else {
+                    wrapperMotivoNoCompra.style.display = 'none';
+                }
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageData = e.target.result;
+                    document.getElementById('foto-preview').src = currentImageData;
+                    document.getElementById('foto-preview-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            ['clientes', 'supervision', 'mapa', 'resumen'].forEach(id => {
+                const btn = document.getElementById('nav-' + id);
+                if(btn) {
+                    if(id === tabId) {
+                        btn.classList.remove('text-slate-400');
+                        btn.classList.add('text-blue-400', 'font-bold');
+                    } else {
+                        btn.classList.remove('text-blue-400', 'font-bold');
+                        btn.classList.add('text-slate-400');
+                    }
+                }
+            });
+
+            if(tabId === 'mapa') {
+                setTimeout(() => { initMap(); }, 250);
+            }
+            if(tabId === 'resumen') {
+                renderSummary();
+            }
+            if(tabId === 'supervision') {
+                updateSupervisionClientSelect();
+                setTimeout(() => { 
+                    initSignaturePad('asesor'); 
+                    initSignaturePad('supervisor'); 
+                }, 200);
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function calibrarGpsActual() {
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    gpsCoords = [pos.coords.latitude, pos.coords.longitude];
+                    document.getElementById('gps-lat').value = gpsCoords[0];
+                    document.getElementById('gps-lng').value = gpsCoords[1];
+                    if(map) {
+                        map.setView(gpsCoords, 15);
+                        if(currentGPSMarker) {
+                            currentGPSMarker.setLatLng(gpsCoords);
+                        } else {
+                            currentGPSMarker = L.marker(gpsCoords, {draggable: true}).addTo(map);
+                            currentGPSMarker.on('dragend', function(e) {
+                                const latLng = e.target.getLatLng();
+                                gpsCoords = [latLng.lat, latLng.lng];
+                                document.getElementById('gps-lat').value = gpsCoords[0];
+                                document.getElementById('gps-lng').value = gpsCoords[1];
+                            });
+                        }
+                    }
+                }, err => {});
+            }
+        }
+
+        function registerClient(event) {
+            event.preventDefault();
+            const editIndex = document.getElementById('edit-index').value;
+
+            const clientData = {
+                abierto: document.getElementById('c-abierto').value,
+                nombre: document.getElementById('c-nombre').value,
+                tipoCierre: document.getElementById('c-tipo-cierre').value,
+                telefono: document.getElementById('c-telefono').value,
+                recibe: document.getElementById('c-recibe').value,
+                segmento: document.getElementById('c-segmento').value,
+                impacto: document.getElementById('c-impacto').value,
+                compra: document.getElementById('c-compra').value,
+                motivoNoCompra: document.getElementById('c-motivo-no-compra').value,
+                codigos: document.getElementById('c-codigos').value,
+                notas: document.getElementById('c-notas').value,
+                foto: currentImageData,
+                coords: [...gpsCoords]
+            };
+
+            if(editIndex !== '') {
+                clients[editIndex] = clientData;
+                document.getElementById('edit-index').value = '';
+                document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-user-plus"></i> Alta de Cliente en Base de Datos';
+                document.getElementById('cancel-edit-btn').classList.add('hidden');
+            } else {
+                clients.push(clientData);
+            }
+
+            localStorage.setItem('intmex_clients', JSON.stringify(clients));
+            document.getElementById('client-form').reset();
+            currentImageData = '';
+            document.getElementById('foto-preview-container').classList.add('hidden');
+            toggleClientFields();
+            alert('¡Cliente registrado con éxito y geolocalizado!');
+        }
+
+        function updateSupervisionClientSelect() {
+            const select = document.getElementById('supervision-client-select');
+            if(!select) return;
+            select.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
+            clients.forEach((c, idx) => {
+                select.innerHTML += `<option value="${idx}">${idx+1}. ${c.nombre} (${c.abierto === 'SÍ' ? 'Abierto' : 'Cerrado'})</option>`;
+            });
+        }
+
+        function submitSupervision(event) {
+            event.preventDefault();
+            saveSupervisionData();
+            alert('¡Evaluación de los 10 pasos y firmas guardadas correctamente!');
+        }
+
+        function initMap() {
+            if(!map) {
+                map = L.map('map').setView(gpsCoords, 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+                markersLayer = L.layerGroup().addTo(map);
+            } else {
+                map.invalidateSize();
+            }
+
+            markersLayer.clearLayers();
+
+            currentGPSMarker = L.marker(gpsCoords, {draggable: true}).addTo(markersLayer);
+            currentGPSMarker.bindPopup("<b>Tu Ubicación Actual (Calibrable)</b><br>Arrastra este pin si hay desfase").openPopup();
+            currentGPSMarker.on('dragend', function(e) {
+                const latLng = e.target.getLatLng();
+                gpsCoords = [latLng.lat, latLng.lng];
+                document.getElementById('gps-lat').value = gpsCoords[0];
+                document.getElementById('gps-lng').value = gpsCoords[1];
+            });
+
+            document.getElementById('gps-lat').value = gpsCoords[0];
+            document.getElementById('gps-lng').value = gpsCoords[1];
+
+            if(clients.length > 0) {
+                clients.forEach((c, idx) => {
+                    const pos = c.coords || gpsCoords;
+                    const marker = L.marker(pos);
+                    marker.bindPopup(`<b>${idx+1}. ${c.nombre}</b><br>Estatus: ${c.abierto === 'SÍ' ? 'Abierto' : 'Cerrado'}<br>Compra: ${c.compra}`);
+                    markersLayer.addLayer(marker);
+                });
+            }
+        }
+
+        function renderSummary() {
+            const container = document.getElementById('summary-content');
+            if(!container) return;
+
+            let totalPasos = 10;
+            let cumplidos = 0;
+            if(supervisionData.pasos) {
+                supervisionData.pasos.forEach(p => { if(p === 'Cumple') cumplidos++; });
+            }
+            let porcentajeDesempeño = Math.round((cumplidos / totalPasos) * 100);
+
+            let html = `
+            <!-- REPORTE EJECUTIVO GLOBAL -->
+            <div class="bg-slate-900 p-5 rounded-lg border border-slate-700 shadow print-black">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-3">
+                    <h3 class="text-sm font-bold text-blue-400 uppercase"><i class="fa-solid fa-chart-line"></i> Reporte Ejecutivo Global de Ruta</h3>
+                    <span class="text-xs text-slate-400">Fecha: ${new Date().toLocaleDateString()}</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-4">
+                    <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                        <p class="text-slate-400">CEDIS / Ruta</p>
+                        <p class="text-sm font-bold text-slate-100">${routeData.cedis || 'N/A'} - ${routeData.ruta || 'N/A'}</p>
+                    </div>
+                    <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                        <p class="text-slate-400">Asesor</p>
+                        <p class="text-sm font-bold text-slate-100">${routeData.asesor || 'N/A'}</p>
+                    </div>
+                    <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                        <p class="text-slate-400">Supervisor</p>
+                        <p class="text-sm font-bold text-slate-100">${routeData.supervisor || 'N/A'}</p>
+                    </div>
+                    <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                        <p class="text-slate-400">Calificación de Desempeño</p>
+                        <p class="text-sm font-bold text-emerald-400">${porcentajeDesempeño}% (${cumplidos}/10 Pasos)</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300"><b>Motivo de Supervisión:</b> ${routeData.objetivo || 'N/A'} | <b>Tipo de Ruta:</b> ${routeData.tipoRuta || 'N/A'}</p>
+            </div>
+
+            <!-- DETALLE DE LOS 10 PASOS -->
+            <div class="bg-slate-900 p-5 rounded-lg border border-slate-700 shadow print-black mt-4">
+                <h3 class="text-sm font-bold text-blue-400 mb-3"><i class="fa-solid fa-clipboard-check"></i> Evaluación Detallada (10 Pasos de Visita)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">`;
+            
+            pasos10.forEach((paso, idx) => {
+                const est = supervisionData.pasos ? supervisionData.pasos[idx] || 'Cumple' : 'Cumple';
+                const colorEst = est === 'Cumple' ? 'text-emerald-400' : est === 'No Cumple' ? 'text-red-400' : 'text-amber-400';
+                html += `<div class="flex justify-between bg-slate-800 p-2 rounded border border-slate-700">
+                    <span class="text-slate-200">${paso}</span>
+                    <span class="font-bold ${colorEst}">${est}</span>
+                </div>`;
+            });
+
+            html += `</div>
+                <p class="text-xs text-slate-300 mt-3"><b>Comentarios Generales:</b> ${supervisionData.comentarios || 'Sin comentarios registrados.'}</p>
+            </div>
+
+            <!-- FIRMAS DE CONFORMIDAD Y AUTORIZACION -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 text-center">
+                    <p class="text-xs text-slate-300 font-bold mb-2">Firma de Conformidad del Asesor</p>
+                    ${supervisionData.signatureAsesor ? `<img src="${supervisionData.signatureAsesor}" class="h-16 mx-auto border border-slate-600 rounded bg-slate-950">` : '<p class="text-xs text-amber-400 italic">Sin firma registrada</p>'}
+                    <p class="text-xs text-slate-400 mt-2">${routeData.asesor || 'Asesor'}</p>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 text-center">
+                    <p class="text-xs text-slate-300 font-bold mb-2">Firma de Autorización del Supervisor</p>
+                    ${supervisionData.signatureSupervisor ? `<img src="${supervisionData.signatureSupervisor}" class="h-16 mx-auto border border-slate-600 rounded bg-slate-950">` : '<p class="text-xs text-amber-400 italic">Sin firma registrada</p>'}
+                    <p class="text-xs text-slate-400 mt-2">${routeData.supervisor || 'Supervisor'}</p>
+                </div>
+            </div>
+
+            <!-- HISTORIAL DE CLIENTES Y EVIDENCIA FOTOGRAFICA DE FACHADA -->
+            <h3 class="text-sm font-bold text-slate-200 mt-6 mb-2">Historial de Clientes y Evidencia Fotográfica de Fachada (${clients.length})</h3>`;
+            
+            if(clients.length === 0) {
+                html += `<p class="text-xs text-slate-400 bg-slate-900 p-4 rounded border border-slate-800">No hay clientes registrados en la sesión actual.</p>`;
+            } else {
+                html += `<div class="space-y-3">`;
+                clients.forEach((c, idx) => {
+                    html += `<div class="bg-slate-900 p-4 rounded-lg border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs print-black">
+                        <div class="flex-1">
+                            <p class="font-bold text-blue-300 text-sm">${idx+1}. ${c.nombre} <span class="px-2 py-0.5 rounded text-[10px] ${c.abierto==='SÍ'?'bg-emerald-900 text-emerald-300':'bg-red-900 text-red-300'}">${c.abierto === 'SÍ' ? 'Abierto' : 'Cerrado ('+c.tipoCierre+')'}</span></p>
+                            <p class="text-slate-400 mt-1">Tel: ${c.telefono || 'N/A'} | Recibe: ${c.recibe || 'N/A'} | Segmento: ${c.segmento}</p>
+                            <p class="text-slate-300 mt-0.5"><b>Compra Efectiva:</b> ${c.compra} ${c.compra === 'NO' ? '(<span class="text-amber-400">Motivo: ' + c.motivoNoCompra + '</span>)' : ''}</p>
+                            <p class="text-slate-400 italic mt-1">Notas: ${c.notas || 'Ninguna'}</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-[10px] text-slate-400 mb-1 font-semibold">Evidencia Fachada</span>
+                            ${c.foto ? `<img src="${c.foto}" class="w-24 h-24 object-cover rounded border border-slate-600 print-img shadow">` : '<span class="text-[10px] text-amber-400 italic">Sin foto</span>'}
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function exportToCSV() {
+            if(clients.length === 0) {
+                alert('No hay clientes registrados para exportar a CSV.');
+                return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,Index,CEDIS,Ruta,Asesor,Cliente,Abierto,Telefono,Recibe,Segmento,CompraEfectiva,Latitud,Longitud\n";
+            clients.forEach((c, idx) => {
+                const lat = c.coords ? c.coords[0] : '';
+                const lng = c.coords ? c.coords[1] : '';
+                csvContent += `${idx+1},${routeData.cedis || ''},${routeData.ruta || ''},"${routeData.asesor || ''}","${c.nombre}",${c.abierto},"${c.telefono || ''}","${c.recibe || ''}","${c.segmento}",${c.compra},${lat},${lng}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `reporte_intmex_${routeData.cedis || 'ruta'}_mymaps.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function toggleRescuePanel() {
+            const p = document.getElementById('rescue-panel');
+            p.classList.toggle('hidden');
+        }
+
+        function exportBackup() {
+            const backup = { routeData, clients, supervisionData };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'respaldo_intmex.json';
+            a.click();
+        }
+
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        const data = JSON.parse(evt.target.result);
+                        if(data.clients) { clients = data.clients; localStorage.setItem('intmex_clients', JSON.stringify(clients)); }
+                        if(data.routeData) { routeData = data.routeData; localStorage.setItem('intmex_routedata', JSON.stringify(routeData)); }
+                        if(data.supervisionData) { supervisionData = data.supervisionData; localStorage.setItem('intmex_supervision', JSON.stringify(supervisionData)); }
+                        loadRouteData();
+                        loadSupervisionData();
+                        alert('¡Respaldo cargado con éxito!');
+                    } catch(err) { alert('Archivo de respaldo inválido'); }
+                }
+                reader.readAsText(file);
+            }
+        }
+
+        window.onload = function() {
+            loadRouteData();
+            toggleClientFields();
+            loadSupervisionData();
+            calibrarGpsActual();
+        }
+    </script>
+</body>
+</html>
