@@ -12,12 +12,13 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        #map { height: 450px; border-radius: 0.5rem; cursor: crosshair; }
-        .signature-pad { border: 2px dashed #4b5563; background: #1f2937; border-radius: 0.5rem; cursor: crosshair; touch-action: none; }
+        #map { height: 450px; border-radius: 0.5rem; }
+        .signature-pad { border: 2px dashed #4b5563; background: #0f172a; border-radius: 0.5rem; cursor: crosshair; touch-action: none; }
         @media print {
             body { background: white !important; color: black !important; }
-            .no-print, header, nav, button { display: none !important; }
+            .no-print, header, nav, button, select, input { display: none !important; }
             .print-container { background: white !important; color: black !important; border: none !important; box-shadow: none !important; }
+            .print-only { display: block !important; }
         }
     </style>
 </head>
@@ -193,7 +194,7 @@
                 <!-- CAMARA NATIVA OBLIGATORIA -->
                 <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg">
                     <label class="block text-xs text-amber-400 mb-1 font-bold">
-                        <i class="fa-solid fa-camera"></i> Foto de Fachada o Negocio (Abre Cámara Directa)
+                        <i class="fa-solid fa-camera"></i> Foto de Fachada o Negocio
                     </label>
                     <input type="file" id="c-foto" accept="image/*" capture="environment" onchange="previewImage(event)" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
                     <div id="foto-preview-container" class="mt-2 hidden">
@@ -204,7 +205,7 @@
                 <div class="pt-4 flex justify-between items-center">
                     <button type="button" id="cancel-edit-btn" onclick="cancelEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-white font-medium px-4 py-2 rounded-lg text-xs">Cancelar Edición</button>
                     <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition flex items-center gap-2 text-sm ml-auto">
-                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cliente en Reporte Ejecutivo
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cliente
                     </button>
                 </div>
             </form>
@@ -213,30 +214,34 @@
         <!-- TAB 2: SUPERVISION -->
         <div id="tab-supervision" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
             <h2 class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-clipboard-list"></i> 3. Supervisión y Evaluación
+                <i class="fa-solid fa-clipboard-list"></i> 3. Supervisión y Evaluación (10 Pasos de Visita)
             </h2>
             <div class="mb-6 p-4 bg-slate-900 border border-slate-700 rounded-lg">
-                <label class="block text-xs text-slate-400 mb-2 font-semibold uppercase">Seleccionar Cliente:</label>
+                <label class="block text-xs text-slate-400 mb-2 font-semibold uppercase">Seleccionar Cliente a Evaluar:</label>
                 <select id="supervision-client-select" class="w-full bg-slate-800 border border-slate-600 rounded p-2.5 text-sm text-slate-200">
                     <option value="">-- Seleccione un cliente --</option>
                 </select>
             </div>
             <form id="supervision-form" onsubmit="submitSupervision(event)" class="space-y-4">
-                <div id="checklist-container" class="space-y-2"></div>
+                <div id="checklist-container" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-700 mt-4">
                     <div>
                         <label class="block text-xs text-slate-300 mb-1 font-semibold">Firma Asesor</label>
                         <canvas id="asesor-sig-pad" class="signature-pad w-full h-32"></canvas>
-                        <button type="button" onclick="clearSig('asesor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar</button>
+                        <button type="button" onclick="clearSig('asesor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar Firma Asesor</button>
                     </div>
                     <div>
                         <label class="block text-xs text-slate-300 mb-1 font-semibold">Firma Supervisor</label>
                         <canvas id="supervisor-sig-pad" class="signature-pad w-full h-32"></canvas>
-                        <button type="button" onclick="clearSig('supervisor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar</button>
+                        <button type="button" onclick="clearSig('supervisor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar Firma Supervisor</button>
                     </div>
                 </div>
+
                 <div class="pt-6 flex justify-end">
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition text-sm">Finalizar Supervisión</button>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i> Finalizar Supervisión
+                    </button>
                 </div>
             </form>
         </div>
@@ -246,14 +251,14 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
                 <div>
                     <h2 class="text-lg font-semibold text-blue-400 flex items-center gap-2">
-                        <i class="fa-solid fa-map"></i> 4. Mapa Interactivo - Corrección de Pines de Clientes
+                        <i class="fa-solid fa-map"></i> 4. Mapa Interactivo - Corrección y Ajuste de Pines
                     </h2>
-                    <p class="text-xs text-slate-400">Haz clic sobre el pin desfasado de un cliente registrado en el mapa para iniciar la corrección.</p>
+                    <p class="text-xs text-slate-400">Los pines muestran el nombre del cliente y pueden arrastrarse para ajustar la ubicación exacta en el mapa.</p>
                 </div>
             </div>
             
             <div id="map-notice" class="bg-blue-950/80 border border-blue-500 text-blue-200 text-xs p-3 rounded-lg mb-3 flex items-center justify-between">
-                <span id="map-instruction-text"><i class="fa-solid fa-circle-info"></i> Haz clic en el pin del cliente que deseas modificar.</span>
+                <span id="map-instruction-text"><i class="fa-solid fa-circle-info"></i> Arrastra cualquier pin para reubicar al cliente. La coordenada se actualiza automáticamente.</span>
             </div>
 
             <div id="map"></div>
@@ -264,14 +269,20 @@
             <!-- Botones Superiores del Panel Gerencial -->
             <div class="no-print flex flex-wrap gap-3 mb-6 bg-slate-900/80 p-3 rounded-xl border border-slate-700 items-center">
                 <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
-                    <i class="fa-solid fa-print"></i> Imprimir Reporte / Evaluación y Firmas
+                    <i class="fa-solid fa-print"></i> Imprimir Reporte PDF
                 </button>
-                <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
-                    <i class="fa-solid fa-file-csv"></i> CSV Base de Datos
+                <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> Descargar CSV My Maps
                 </button>
                 <button onclick="clearHistory()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow ml-auto flex items-center gap-2">
                     <i class="fa-solid fa-trash"></i> Borrar Todo
                 </button>
+            </div>
+
+            <!-- Header de Impresión -->
+            <div class="hidden print-only mb-6 border-b-2 border-slate-800 pb-4">
+                <h1 class="text-2xl font-bold text-slate-900">SUPERVISION INTMEX - REPORTE GERENCIAL DE CAMPO</h1>
+                <p id="print-header-info" class="text-xs text-slate-600 mt-1"></p>
             </div>
 
             <!-- 4 Tarjetas de Métricas Principales -->
@@ -302,16 +313,31 @@
                     Estatus de Desempeño: INEFICIENTE
                 </div>
                 <div class="mt-2 text-xs text-slate-400">
-                    <p class="font-bold text-amber-400 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Áreas donde requiere capacitación (Pasos con más fallos):</p>
+                    <p class="font-bold text-amber-400 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Áreas de Oportunidad / Fallos más comunes:</p>
                     <ul id="eval-fallos-list" class="list-disc list-inside space-y-0.5 text-slate-300 pl-2">
-                        <li>Ningún fallo registrado aún.</li>
+                        <li>Sin evaluaciones registradas todavía.</li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Distribución de Clientes Segmentados -->
+            <!-- Muestra de Firmas Registradas en Reporte -->
             <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl shadow mb-6">
-                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3"><i class="fa-solid fa-chart-column"></i> Distribución de Clientes Segmentados</h3>
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3"><i class="fa-solid fa-signature"></i> Firmas de Autenticidad de Jornada</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-2">Firma del Asesor</p>
+                        <div id="render-sig-asesor" class="h-24 flex items-center justify-center text-xs text-slate-500 italic border border-slate-700 rounded bg-slate-900">Sin firma capturada</div>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-2">Firma del Supervisor</p>
+                        <div id="render-sig-supervisor" class="h-24 flex items-center justify-center text-xs text-slate-500 italic border border-slate-700 rounded bg-slate-900">Sin firma capturada</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distribución por Segmentos -->
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl shadow mb-6">
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3"><i class="fa-solid fa-chart-column"></i> Distribución de Clientes por Segmento</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
                     <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                         <p class="text-xs text-slate-400 font-semibold">Tipo A</p>
@@ -370,27 +396,28 @@
 
     <!-- LÓGICA JAVASCRIPT INTEGRAL -->
     <script>
-        // --- DATOS DE RUTAS POR CEDIS ---
+        // --- 1. RUTAS OFICIALES POR CEDIS ---
         const rutasCEDIS = {
-            TIJ: ["Ruta 101 - Tijuana Centro", "Ruta 102 - Otay", "Ruta 103 - La Presa"],
-            MXLI: ["Ruta 201 - Mexicali Palaco", "Ruta 202 - Mexicali Centro"],
-            HILLO: ["Ruta 301 - Hermosillo Norte", "Ruta 302 - Hermosillo Sur"],
-            MOC: ["Ruta 401 - Los Mochis Centro"],
-            CUL: ["Ruta 501 - Culiacán Poniente", "Ruta 502 - Culiacán Oriente"],
-            MZT: ["Ruta 601 - Mazatlán Zona Dorada"]
+            TIJ: ["Ruta 101 - Tijuana Centro", "Ruta 102 - Otay", "Ruta 103 - La Presa", "Ruta 104 - Playas"],
+            MXLI: ["Ruta 201 - Mexicali Palaco", "Ruta 202 - Mexicali Centro", "Ruta 203 - Valle Mexicali"],
+            HILLO: ["Ruta 301 - Hermosillo Norte", "Ruta 302 - Hermosillo Sur", "Ruta 303 - Hermosillo Centro"],
+            MOC: ["Ruta 401 - Los Mochis Centro", "Ruta 402 - Guasave"],
+            CUL: ["Ruta 501 - Culiacán Poniente", "Ruta 502 - Culiacán Oriente", "Ruta 503 - Culiacán Sur"],
+            MZT: ["Ruta 601 - Mazatlán Zona Dorada", "Ruta 602 - Mazatlán Centro"]
         };
 
+        // --- 2. CHECKLIST OFICIAL DE 10 PASOS ---
         const pasosChecklist = [
-            "1. ID del cliente en base de datos",
-            "2. Saludo cordial y presentación",
-            "3. Presencia de nuestras marcas",
-            "4. Verificación de stock suficiente",
-            "5. Revisión de Caducidades (FIFO)",
-            "6. Impulso de nuevas variantes",
-            "7. Cierre de promociones vigentes",
-            "8. Resumen de venta comunicado",
-            "9. Correcto manejo de objeciones",
-            "10. Despedida y agradecimiento"
+            "1. ID cliente en base de datos",
+            "2. Saludo al cliente",
+            "3. ID nuestras marcas",
+            "4. ID stock suficiente",
+            "5. Caducidades (FIFO)",
+            "6. Impulso de variantes",
+            "7. Cierre promos",
+            "8. Comunicar venta a cliente",
+            "9. Manejo de objeciones",
+            "10. Despedida"
         ];
 
         let state = {
@@ -400,21 +427,24 @@
             tipoRuta: "Ruta Activa",
             objetivo: "",
             clientes: [],
-            evaluaciones: {}
+            evaluaciones: {},
+            firmaAsesor: "",
+            firmaSupervisor: ""
         };
 
         let map = null;
         let mapMarkers = [];
 
-        // --- INICIALIZACIÓN ---
+        // --- INICIALIZACIÓN GENERAL ---
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
             initChecklist();
             initMap();
+            initSignatures();
             updateMetrics();
         });
 
-        // --- NAVEGACIÓN ENTRE PESTAÑAS (4 BOTONES INFERIORES) ---
+        // --- NAVEGACIÓN PESTAÑAS ---
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
@@ -440,7 +470,7 @@
             document.getElementById('rescue-panel').classList.toggle('hidden');
         }
 
-        // --- MANEJO DE RUTAS Y CEDIS ---
+        // --- MANEJO DE CEDIS Y RUTAS ---
         function onCedisChange() {
             const cedis = document.getElementById('f-cedis').value;
             const rutaSelect = document.getElementById('f-ruta');
@@ -478,11 +508,12 @@
             }
         }
 
-        // --- REGISTRO DE CLIENTES ---
+        // --- REGISTRO Y CONDICIONANTES DE CLIENTES ---
         function toggleClientFields() {
             const abierto = document.getElementById('c-abierto').value;
             const wrapperCierre = document.getElementById('wrapper-tipo-cierre');
             const condFields = document.querySelectorAll('.conditional-field');
+            
             if (abierto === 'NO') {
                 wrapperCierre.style.display = 'block';
                 condFields.forEach(f => f.style.display = 'none');
@@ -530,6 +561,8 @@
             if (editIndex !== "") {
                 state.clientes[editIndex] = clientData;
                 document.getElementById('edit-index').value = "";
+                document.getElementById('submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar Cliente';
+                document.getElementById('cancel-edit-btn').classList.add('hidden');
             } else {
                 state.clientes.push(clientData);
             }
@@ -538,13 +571,51 @@
             document.getElementById('client-form').reset();
             document.getElementById('foto-preview-container').classList.add('hidden');
             photoBase64 = "";
+            toggleClientFields();
             updateMetrics();
             updateSupervisionSelect();
             renderMapMarkers();
             alert("Cliente registrado exitosamente.");
         }
 
-        // --- CHECKLIST Y SUPERVISIÓN ---
+        function editClient(index) {
+            const c = state.clientes[index];
+            document.getElementById('edit-index').value = index;
+            document.getElementById('c-abierto').value = c.abierto;
+            document.getElementById('c-nombre').value = c.nombre;
+            document.getElementById('c-tipo-cierre').value = c.tipoCierre || "";
+            document.getElementById('c-telefono').value = c.telefono || "";
+            document.getElementById('c-recibe').value = c.recibe || "";
+            document.getElementById('c-segmento').value = c.segmento || "Tipo A";
+            document.getElementById('c-impacto').value = c.impacto || "SÍ";
+            document.getElementById('c-compra').value = c.compra || "SÍ";
+            document.getElementById('c-motivo-no-compra').value = c.motivoNoCompra || "";
+            document.getElementById('c-codigos').value = c.codigos || "";
+            document.getElementById('c-notas').value = c.notas || "";
+
+            toggleClientFields();
+
+            if (c.foto) {
+                photoBase64 = c.foto;
+                document.getElementById('foto-preview').src = c.foto;
+                document.getElementById('foto-preview-container').classList.remove('hidden');
+            }
+
+            document.getElementById('submit-btn').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Actualizar Cliente';
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            switchTab('tab-clientes');
+        }
+
+        function cancelEdit() {
+            document.getElementById('edit-index').value = "";
+            document.getElementById('client-form').reset();
+            document.getElementById('foto-preview-container').classList.add('hidden');
+            document.getElementById('submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar Cliente';
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            toggleClientFields();
+        }
+
+        // --- CHECKLIST Y EVALUACIÓN ---
         function initChecklist() {
             const container = document.getElementById('checklist-container');
             container.innerHTML = "";
@@ -552,7 +623,7 @@
                 const row = document.createElement('div');
                 row.className = "flex justify-between items-center bg-slate-900 p-2.5 rounded border border-slate-700 text-xs";
                 row.innerHTML = `
-                    <span>${paso}</span>
+                    <span class="text-slate-300 font-medium">${paso}</span>
                     <select id="step-${idx}" class="bg-slate-800 border border-slate-600 rounded p-1 text-slate-200">
                         <option value="1">CUMPLE (1)</option>
                         <option value="0">NO CUMPLE (0)</option>
@@ -577,7 +648,7 @@
             e.preventDefault();
             const clientId = document.getElementById('supervision-client-select').value;
             if (!clientId) {
-                alert("Seleccione un cliente para evaluar.");
+                alert("Seleccione un cliente para realizar la evaluación.");
                 return;
             }
 
@@ -590,81 +661,63 @@
             });
 
             state.evaluaciones[clientId] = { score, fallos };
+
+            // Guardar firmas capturadas
+            const cAsesor = document.getElementById('asesor-sig-pad');
+            const cSupervisor = document.getElementById('supervisor-sig-pad');
+            state.firmaAsesor = cAsesor.toDataURL();
+            state.firmaSupervisor = cSupervisor.toDataURL();
+
             saveRouteData();
             updateMetrics();
-            alert("Evaluación guardada exitosamente.");
+            alert("Supervisión y evaluación guardadas correctamente.");
         }
 
-        // --- MAPA LEAFLET ---
-        function initMap() {
-            map = L.map('map').setView([19.4326, -99.1332], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© SUPERVISION INTMEX'
-            }).addTo(map);
-            renderMapMarkers();
+        // --- CANVAS DE FIRMAS DIGITALES ---
+        function initSignatures() {
+            setupCanvas('asesor-sig-pad');
+            setupCanvas('supervisor-sig-pad');
         }
 
-        function renderMapMarkers() {
-            if (!map) return;
-            mapMarkers.forEach(m => map.removeLayer(m));
-            mapMarkers = [];
+        function setupCanvas(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
 
-            state.clientes.forEach(c => {
-                const marker = L.marker([c.lat, c.lng], { draggable: true }).addTo(map);
-                marker.bindPopup(`<b>${c.nombre}</b><br>Estatus: ${c.abierto === 'SÍ' ? 'Abierto' : 'Cerrado'}`);
-                marker.on('dragend', function(e) {
-                    const pos = e.target.getLatLng();
-                    c.lat = pos.lat;
-                    c.lng = pos.lng;
-                    saveRouteData();
-                });
-                mapMarkers.push(marker);
-            });
-        }
+            function resize() {
+                canvas.width = canvas.parentElement.clientWidth - 10;
+                canvas.height = 120;
+            }
+            resize();
 
-        // --- MÉTRICAS Y REPORTES ---
-        function updateMetrics() {
-            const total = state.clientes.length;
-            document.getElementById('metric-total').textContent = total;
-
-            if (total === 0) {
-                document.getElementById('metric-abiertos').textContent = "0.0%";
-                document.getElementById('metric-compra').textContent = "0.0%";
-                document.getElementById('metric-impacto').textContent = "0.0%";
-                return;
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
-            const abiertos = state.clientes.filter(c => c.abierto === 'SÍ').length;
-            const compra = state.clientes.filter(c => c.compra === 'SÍ').length;
-            const impacto = state.clientes.filter(c => c.impacto === 'SÍ').length;
+            function start(e) { drawing = true; draw(e); }
+            function stop() { drawing = false; ctx.beginPath(); }
+            function draw(e) {
+                if (!drawing) return;
+                const pos = getPos(e);
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
 
-            document.getElementById('metric-abiertos').textContent = ((abiertos / total) * 100).toFixed(1) + "%";
-            document.getElementById('metric-compra').textContent = ((compra / total) * 100).toFixed(1) + "%";
-            document.getElementById('metric-impacto').textContent = ((impacto / total) * 100).toFixed(1) + "%";
-
-            // Segmentos
-            document.getElementById('seg-a').textContent = state.clientes.filter(c => c.segmento === 'Tipo A').length;
-            document.getElementById('seg-b').textContent = state.clientes.filter(c => c.segmento === 'Tipo B').length;
-            document.getElementById('seg-c').textContent = state.clientes.filter(c => c.segmento === 'Tipo C').length;
-            document.getElementById('seg-d').textContent = state.clientes.filter(c => c.segmento === 'Tipo D').length;
-
-            // Render lista en historial
-            const list = document.getElementById('client-history-list');
-            list.innerHTML = "";
-            state.clientes.forEach(c => {
-                const div = document.createElement('div');
-                div.className = "bg-slate-800 p-3 rounded-lg border border-slate-700 text-xs flex justify-between items-center";
-                div.innerHTML = `
-                    <div>
-                        <p class="font-bold text-blue-300 text-sm">${c.nombre}</p>
-                        <p class="text-slate-400">Tel: ${c.telefono || 'N/A'} | Recibe: ${c.recibe || 'N/A'} | Segmento: ${c.segmento}</p>
-                    </div>
-                    <span class="px-2 py-1 rounded text-xs font-bold ${c.abierto === 'SÍ' ? 'bg-emerald-950 text-emerald-400 border border-emerald-600' : 'bg-red-950 text-red-400 border border-red-600'}">
-                        ${c.abierto === 'SÍ' ? 'ABIERTO' : 'CERRADO'}
-                    </span>
-                `;
-                list.appendChild(div);
-            });
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mouseup', stop);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchstart', start);
+            canvas.addEventListener('touchend', stop);
+            canvas.addEventListener('touchmove', draw);
         }
 
         function clearSig(id) {
@@ -673,48 +726,4 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        function exportCSV() {
-            let csv = "ID,Nombre,Abierto,Telefono,Recibe,Segmento,Impacto,Compra,Lat,Lng\n";
-            state.clientes.forEach(c => {
-                csv += `"${c.id}","${c.nombre}","${c.abierto}","${c.telefono}","${c.recibe}","${c.segmento}","${c.impacto}","${c.compra}",${c.lat},${c.lng}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Reporte_INTMEX_${Date.now()}.csv`;
-            a.click();
-        }
-
-        function clearHistory() {
-            if (confirm("¿Está seguro de borrar todos los datos de esta jornada?")) {
-                state.clientes = [];
-                state.evaluaciones = {};
-                saveRouteData();
-                updateMetrics();
-                renderMapMarkers();
-            }
-        }
-
-        function exportBackup() {
-            const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Respaldo_INTMEX_${Date.now()}.json`;
-            a.click();
-        }
-
-        function importBackup(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    state = JSON.parse(evt.target.result);
-                    saveRouteData();
-                    location.reload();
-                };
-                reader.readAsText(file);
-            }
-        }
-    </script>
-</body>
-</html>
+        // --- MAPA LEAFLET E
