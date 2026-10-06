@@ -239,4 +239,213 @@
             </div>
             <div style="margin-top: 15px; font-size: 14px;">
                 <strong>Notas de Visita:</strong>
-                <p style="color: var(--text-muted); margin-top: 5px; background: #0f172a; padding: 10
+                <p style="color: var(--text-muted); margin-top: 5px; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid var(--border);">Se surtió exhibición completa en zona de cajas y se acordó espacio para nueva línea de productos la próxima semana.</p>
+            </div>
+            <div style="margin-top: 15px; font-size: 14px; font-weight: bold; color: var(--brand); display: flex; align-items: center; gap: 8px;">
+                📷 Evidencia Fotográfica de Fachada: <span style="color: var(--success);">Registrada y Adjunta al Expediente</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. CHECKLIST DE SUPERVISIÓN (10 PASOS - SI / NO) -->
+    <div class="card">
+        <h2>3. Evaluación Detallada (Checklist 10 Pasos INTMEX)</h2>
+        <div class="checklist-grid-container" id="checklist-container">
+            <!-- Generado dinámicamente por JS -->
+        </div>
+        <div style="margin-top: 20px;">
+            <label style="font-size: 14px; font-weight: bold; color: var(--text-color);">Comentarios Generales de Supervisión:</label>
+            <textarea id="comentarios-generales" style="width: 100%; height: 80px; background: #0f172a; border: 1px solid var(--border); color: white; border-radius: 6px; padding: 10px; margin-top: 8px; font-family: inherit;" placeholder="Escribe observaciones relevantes sobre el desempeño del asesor durante esta visita..."></textarea>
+        </div>
+    </div>
+
+    <!-- 4. FIRMAS DE CONFORMIDAD -->
+    <div class="card">
+        <h2>4. Validación y Firmas de Autorización</h2>
+        <div class="signatures-container">
+            <div class="signature-box">
+                <p><strong>Firma de Conformidad del Asesor</strong></p>
+                <canvas id="sig-asesor" class="sig-canvas"></canvas>
+                <button onclick="clearSig('asesor')" style="margin-top:8px; background:none; border:none; color:var(--text-muted); cursor:pointer; text-decoration:underline;">Limpiar Firma</button>
+            </div>
+            <div class="signature-box">
+                <p><strong>Firma de Autorización del Supervisor</strong></p>
+                <canvas id="sig-supervisor" class="sig-canvas"></canvas>
+                <button onclick="clearSig('supervisor')" style="margin-top:8px; background:none; border:none; color:var(--text-muted); cursor:pointer; text-decoration:underline;">Limpiar Firma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. REPORTES FINALES -->
+    <div class="card">
+        <h2>5. Centro de Descarga de Reportes</h2>
+        <div class="reports-bar">
+            <button class="btn-report" onclick="exportMyMaps()">🗺️ 1. Base de Datos My Maps (CSV)</button>
+            <button class="btn-report" onclick="exportPerformanceReport()">📋 2. Reporte Desempeño Asesor</button>
+            <button class="btn-report" onclick="exportExecutiveReport()">📊 3. Reporte Ejecutivo Global</button>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // --- MAPA INTERACTIVO CON RUTAS Y COLORES ---
+    const map = L.map('map').setView([19.4326, -99.1332], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap - SUPERVISION INTMEX'
+    }).addTo(map);
+
+    const clientesRuta = [
+        { id: 1, name: "Abarrotes El Punto", lat: 19.4350, lng: -99.1350, ruta: "Norte", color: "#3b82f6" },
+        { id: 2, name: "Minisuper Don Juan", lat: 19.4300, lng: -99.1300, ruta: "Sur", color: "#10b981" },
+        { id: 3, name: "Farmacia La Salud", lat: 19.4380, lng: -99.1400, ruta: "Este", color: "#f59e0b" },
+        { id: 4, name: "Comercializadora Maya", lat: 19.4260, lng: -99.1380, ruta: "Oeste", color: "#ec4899" }
+    ];
+
+    clientesRuta.forEach(c => {
+        const customIcon = L.divIcon({
+            className: 'custom-pin',
+            html: `<div style="background-color: ${c.color}; width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 6px rgba(0,0,0,0.6);"></div>
+                   <span style="background: rgba(15,23,42,0.9); color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap; position: absolute; left: 30px; top: 2px; border: 1px solid #334155;">${c.name} (${c.ruta})</span>`,
+            iconSize: [26, 26],
+            iconAnchor: [13, 13]
+        });
+
+        const marker = L.marker([c.lat, c.lng], { draggable: true, icon: customIcon }).addTo(map);
+        
+        marker.on('dragend', function(event) {
+            const position = marker.getLatLng();
+            c.lat = position.lat;
+            c.lng = position.lng;
+            console.log(`INTMEX - Pin actualizado -> ${c.name}: Lat ${position.lat}, Lng ${position.lng}`);
+        });
+    });
+
+    // --- CHECKLIST DE SUPERVISIÓN (10 PASOS - SI / NO) ---
+    const pasos = [
+        "1. Identificación del cliente en base de datos",
+        "2. Saludo cordial y presentación",
+        "3. Identificación de nuestras marcas (presencia)",
+        "4. Verificación de stock suficiente",
+        "5. Revisión de Caducidades (Sistema FIFO)",
+        "6. Labor de impulso de nuevas variantes",
+        "7. Cierre de promociones vigentes",
+        "8. Comunicar resumen de venta al cliente",
+        "9. Correcto manejo de objeciones",
+        "10. Despedida y agradecimiento"
+    ];
+
+    const checklistContainer = document.getElementById('checklist-container');
+    const checklistState = {};
+
+    pasos.forEach((paso, index) => {
+        checklistState[index] = "SI"; // Predeterminado SI
+        const row = document.createElement('div');
+        row.className = 'checklist-row';
+        row.innerHTML = `
+            <span style="font-size: 14px;"><strong>${paso}</strong></span>
+            <div class="options-group">
+                <button type="button" class="btn-option active-si" id="btn-${index}-SI" onclick="setCheck(${index}, 'SI')">SI</button>
+                <button type="button" class="btn-option" id="btn-${index}-NO" onclick="setCheck(${index}, 'NO')">NO</button>
+            </div>
+        `;
+        checklistContainer.appendChild(row);
+    });
+
+    function setCheck(index, value) {
+        checklistState[index] = value;
+        const btnSi = document.getElementById(`btn-${index}-SI`);
+        const btnNo = document.getElementById(`btn-${index}-NO`);
+        if (value === 'SI') {
+            btnSi.className = 'btn-option active-si';
+            btnNo.className = 'btn-option';
+        } else {
+            btnSi.className = 'btn-option';
+            btnNo.className = 'btn-option active-no';
+        }
+    }
+
+    // --- MANEJO DE FIRMAS CANVAS ---
+    function setupCanvas(id) {
+        const canvas = document.getElementById(id);
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+
+        // Ajustar el tamaño del canvas interno al tamaño del contenedor
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth - 30; // Restando padding
+            canvas.height = 130;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function startPosition(e) { 
+            painting = true; 
+            draw(e); 
+            // Prevenir scroll en móviles mientras se firma
+            if(e.type.includes('touch')) e.preventDefault(); 
+        }
+        function endPosition() { painting = false; ctx.beginPath(); }
+        function draw(e) {
+            if (!painting) return;
+            if(e.type.includes('touch')) e.preventDefault();
+            
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#38bdf8';
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', startPosition, {passive: false});
+        canvas.addEventListener('touchend', endPosition);
+        canvas.addEventListener('touchmove', draw, {passive: false});
+    }
+
+    setupCanvas('sig-asesor');
+    setupCanvas('sig-supervisor');
+
+    function clearSig(type) {
+        const canvas = document.getElementById(`sig-${type}`);
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // --- FUNCIONES DE LOS 3 REPORTES ---
+    function exportMyMaps() {
+        let csvContent = "data:text/csv;charset=utf-8,Name,Latitude,Longitude,Route,Color\n";
+        clientesRuta.forEach(c => {
+            csvContent += `"${c.name}",${c.lat},${c.lng},"${c.ruta}","${c.color}"\n`;
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "INTMEX_Base_Datos_MyMaps.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportPerformanceReport() {
+        alert("SUPERVISION INTMEX\n\nGenerando Reporte de Desempeño del Asesor...\nIncluyendo desglose del checklist 10 pasos (SI/NO), notas de visita, evidencia de fachada y validación mediante firmas digitales.");
+    }
+
+    function exportExecutiveReport() {
+        alert("SUPERVISION INTMEX\n\nGenerando Reporte Ejecutivo Global...\nConsolidado detallado con métricas de segmentación, compra efectiva, cumplimiento general y coordenadas geográficas de la ruta.");
+    }
+</script>
+
+</body>
+</html>
