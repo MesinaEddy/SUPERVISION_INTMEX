@@ -3,585 +3,718 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPERVISION INTMEX</title>
-    <!-- Leaflet CSS -->
+    <title>SUPERVISION INTMEX - Panel Ejecutivo Gerencial</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-main: #0b132b;
-            --bg-card: #1c2541;
-            --bg-input: #0f172a;
-            --border-color: #2a3a5e;
-            --text-primary: #ffffff;
-            --text-secondary: #8d99ae;
-            --accent-blue: #00b4d8;
-            --btn-green: #10b981;
-            --btn-red: #ef4444;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .app-container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        /* Encabezado */
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .brand-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand-logo {
-            height: 50px;
-            border-radius: 6px;
-            object-fit: contain;
-        }
-
-        .brand-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: #ffffff;
-            margin: 0;
-        }
-
-        /* Tarjetas de la Interfaz */
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #ffffff;
-        }
-
-        /* Mapa Interactivo */
-        #map {
-            height: 380px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .route-legend {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 12px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .legend-tag {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        /* Estilos del Pin en Mapa */
-        .custom-pin-label {
-            background: rgba(11, 19, 43, 0.95);
-            border: 1px solid var(--border-color);
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-        }
-
-        /* Grid del Checklist (10 Pasos) */
-        .checklist-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .checklist-grid { grid-template-columns: 1fr; }
-        }
-
-        .step-item {
-            background: rgba(11, 19, 43, 0.5);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .step-label {
-            font-size: 0.9rem;
-            color: #e2e8f0;
-        }
-
-        .btn-toggle-group {
-            display: flex;
-            gap: 4px;
-        }
-
-        .btn-toggle {
-            background: #2a3a5e;
-            color: var(--text-secondary);
-            border: none;
-            padding: 5px 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-toggle.active-si {
-            background: var(--btn-green);
-            color: #ffffff;
-        }
-
-        .btn-toggle.active-no {
-            background: var(--btn-red);
-            color: #ffffff;
-        }
-
-        .comments-box {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .comments-box textarea {
-            width: 100%;
-            height: 50px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: #fff;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
-            resize: vertical;
-        }
-
-        /* Seccion de Firmas (Fiel a la Captura 3) */
-        .signatures-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .signature-card {
-            border: 1px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-            background: rgba(11, 19, 43, 0.4);
-        }
-
-        .signature-card p {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 8px;
-        }
-
-        canvas.sig-canvas {
-            background: #060a17;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            width: 100%;
-            height: 110px;
-            cursor: crosshair;
-        }
-
-        .btn-clear {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            cursor: pointer;
-            margin-top: 4px;
-            text-decoration: underline;
-        }
-
-        /* Historial de Clientes (Fiel a la Captura 3) */
-        .client-card-item {
-            background: rgba(11, 19, 43, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            position: relative;
-        }
-
-        .client-top-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
-        }
-
-        .client-title {
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
-
-        .badge-open {
-            background: #059669;
-            color: #fff;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .client-details {
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .photo-status {
-            position: absolute;
-            right: 15px;
-            bottom: 15px;
-            font-size: 0.75rem;
-            text-align: right;
-        }
-
-        /* Botones de Descarga de Reportes */
-        .reports-container {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-report-action {
-            flex: 1;
-            min-width: 220px;
-            padding: 12px 16px;
-            border-radius: 6px;
-            border: none;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: white;
-            transition: opacity 0.2s;
-        }
-
-        .btn-report-action:hover { opacity: 0.9; }
-        .btn-mymaps { background-color: #2563eb; }
-        .btn-performance { background-color: #059669; }
-        .btn-executive { background-color: #7c3aed; }
-
-        /* Formato de Impresion para Reportes PDF */
+        #map { height: 450px; border-radius: 0.5rem; cursor: crosshair; }
+        .signature-pad { border: 2px dashed #4b5563; background: #1f2937; border-radius: 0.5rem; cursor: crosshair; touch-action: none; }
         @media print {
-            body { background: white; color: black; padding: 0; }
-            .card { border: 1px solid #ccc; background: white; color: black; box-shadow: none; }
-            .btn-report-action, .btn-clear, .btn-toggle { display: none; }
-            .step-item { border: 1px solid #eee; background: #fff; color: #000; }
-            canvas.sig-canvas { border: 1px solid #000; background: #fff; }
+            body { background: white !important; color: black !important; }
+            .no-print, header, nav, button { display: none !important; }
+            .print-container { background: white !important; color: black !important; border: none !important; box-shadow: none !important; }
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-28">
 
-<div class="app-container">
-
-    <!-- Encabezado con Nombre y Logo desde GitHub -->
-    <header class="app-header">
-        <div class="brand-box">
-            <!-- Pega aquí la URL directa de tu logo en GitHub -->
-            <img src="https://raw.githubusercontent.com/TuUsuario/TuRepo/main/logo.png" 
-                 alt="Logo INTMEX" 
-                 class="brand-logo"
-                 onerror="this.style.display='none'">
-            <h1 class="brand-title">SUPERVISION INTMEX</h1>
+    <!-- Header con Logotipo e Identidad -->
+    <header class="no-print bg-slate-800 border-b border-slate-700 py-3 px-6 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow border-2 border-blue-400 overflow-hidden flex-shrink-0">
+                    <img src="logo.png" alt="INTMEX Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentNode.innerHTML='INT';">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide text-blue-400">SUPERVISION INTMEX</h1>
+                    <p class="text-xs text-slate-400">Panel Ejecutivo Gerencial | Control de Campo y Auditoría</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 mt-2 md:mt-0 flex-wrap">
+                <button onclick="toggleRescuePanel()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Panel de Rescate
+                </button>
+                <div id="gps-status" class="bg-emerald-900/60 border border-emerald-500 text-emerald-300 text-xs px-3 py-1.5 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot animate-pulse"></i>
+                    <span id="gps-text">GPS Activo</span>
+                </div>
+            </div>
         </div>
     </header>
 
-    <!-- 1. MAPA INTERACTIVO CON NOMBRES Y COLOR POR RUTA -->
-    <div class="card">
-        <div class="card-title">📍 Mapa Interactivo de Rutas</div>
-        <div class="route-legend">
-            <div class="legend-tag"><div class="dot" style="background:#3b82f6"></div> Ruta Norte</div>
-            <div class="legend-tag"><div class="dot" style="background:#10b981"></div> Ruta Sur</div>
-            <div class="legend-tag"><div class="dot" style="background:#f59e0b"></div> Ruta Este</div>
-        </div>
-        <div id="map"></div>
-    </div>
-
-    <!-- 2. EVALUACIÓN DETALLADA (CHECKLIST 10 PASOS - SI / NO DIRECTO) -->
-    <div class="card">
-        <div class="card-title">☑️ Evaluación Detallada (10 Pasos de Visita)</div>
-        <div class="checklist-grid" id="checklist-grid">
-            <!-- Generado dinámicamente con botones SI / NO -->
-        </div>
-        <div class="comments-box">
-            <strong>Comentarios Generales:</strong>
-            <textarea placeholder="Sin comentarios registrados."></textarea>
-        </div>
-    </div>
-
-    <!-- 3. FIRMAS DE AUTORIZACIÓN (REPLICADO DE CAPTURA 3) -->
-    <div class="card">
-        <div class="signatures-grid">
-            <div class="signature-card">
-                <p>Firma de Conformidad del Asesor</p>
-                <canvas id="sig-asesor" class="sig-canvas"></canvas>
-                <p style="font-size:0.75rem; color:var(--text-secondary); margin: 2px 0;">Asesor</p>
-                <button class="btn-clear" onclick="clearCanvas('sig-asesor')">Limpiar Firma</button>
-            </div>
-            <div class="signature-card">
-                <p>Firma de Autorización del Supervisor</p>
-                <canvas id="sig-supervisor" class="sig-canvas"></canvas>
-                <p style="font-size:0.75rem; color:var(--text-secondary); margin: 2px 0;">Supervisor</p>
-                <button class="btn-clear" onclick="clearCanvas('sig-supervisor')">Limpiar Firma</button>
+    <!-- PANEL DE RESCATE -->
+    <div id="rescue-panel" class="no-print max-w-7xl mx-auto px-4 mt-4 hidden">
+        <div class="bg-amber-950/80 border border-amber-600 rounded-xl p-4 shadow-xl">
+            <h3 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> Centro de Recuperación de Datos
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportBackup()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-2 rounded font-medium">
+                    <i class="fa-solid fa-download"></i> Descargar Respaldo JSON
+                </button>
+                <label class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-2 rounded font-medium cursor-pointer">
+                    <i class="fa-solid fa-upload"></i> Cargar Respaldo JSON <input type="file" accept=".json" onchange="importBackup(event)" class="hidden">
+                </label>
             </div>
         </div>
     </div>
 
-    <!-- 4. HISTORIAL DE CLIENTES Y EVIDENCIA -->
-    <div class="card">
-        <div class="card-title">📷 Historial de Clientes y Evidencia Fotográfica de Fachada</div>
-        <div class="client-card-item">
-            <div class="client-top-bar">
-                <span class="client-title">1. Abarrotes "El Punto"</span>
-                <span class="badge-open">Abierto</span>
+    <!-- 1. DATOS DE RUTA Y ASESOR -->
+    <section class="no-print max-w-7xl mx-auto px-4 mt-6">
+        <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-4 shadow-lg">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
+                <h2 class="text-sm font-semibold text-blue-300 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-id-card"></i> 1. Datos de Ruta y Asesor (Fijos en Jornada)
+                </h2>
+                <span class="text-xs text-slate-400 bg-slate-700 px-2 py-0.5 rounded">Autoguardado activo</span>
             </div>
-            <div class="client-details">
-                <strong>Tel:</strong> 1234567890 &nbsp;|&nbsp; 
-                <strong>Recibe:</strong> Juan Pérez &nbsp;|&nbsp; 
-                <strong>Segmento:</strong> Tipo A: Cobro, pasillos, refis y carnicería<br>
-                <strong>Compra Efectiva:</strong> SÍ<br>
-                <em>Notas: Exhibición completa surtida.</em>
-            </div>
-            <div class="photo-status">
-                <span style="color:var(--text-secondary);">Evidencia Fachada:</span><br>
-                <span style="color:#f59e0b; font-style:italic;">Foto Registrada</span>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">CEDIS</label>
+                    <select id="f-cedis" onchange="onCedisChange()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                        <option value="">Seleccione CEDIS</option>
+                        <option value="TIJ">TIJUANA</option>
+                        <option value="MXLI">MEXICALI</option>
+                        <option value="HILLO">HERMOSILLO</option>
+                        <option value="MOC">MOCHIS</option>
+                        <option value="CUL">CULIACAN</option>
+                        <option value="MZT">MAZATLAN</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Ruta</label>
+                    <select id="f-ruta" onchange="saveRouteData()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                        <option value="">Primero seleccione un CEDIS</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Nombre del Asesor</label>
+                    <input type="text" id="f-asesor" placeholder="Ej. Carlos Gutiérrez" oninput="saveRouteData()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Tipo de Ruta</label>
+                    <select id="f-tipo-ruta" onchange="saveRouteData()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                        <option value="Ruta Activa">Ruta Activa</option>
+                        <option value="Ruta Nueva">Ruta Nueva</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Objetivo de Supervisión</label>
+                    <select id="f-objetivo" onchange="saveRouteData()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200 outline-none">
+                        <option value="">Seleccione Objetivo</option>
+                        <option value="Venta">Venta</option>
+                        <option value="Capacitación">Capacitación</option>
+                        <option value="Territorio">Territorio</option>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- 5. TRES REPORTES SOLICITADOS -->
-    <div class="card">
-        <div class="card-title">📄 Centro de Reportes</div>
-        <div class="reports-container">
-            <button class="btn-report-action btn-mymaps" onclick="downloadMyMapsCSV()">
-                💾 1. Base de Datos (My Maps CSV)
+    <!-- MÓDULOS DE NAVEGACIÓN -->
+    <main class="max-w-7xl mx-auto px-4 mt-6">
+
+        <!-- TAB 1: REGISTRO DE CLIENTES -->
+        <div id="tab-clientes" class="tab-content bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+            <h2 id="form-title" class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus"></i> 2. Alta de Cliente en Base de Datos
+            </h2>
+            <form id="client-form" onsubmit="registerClient(event)" class="space-y-4">
+                <input type="hidden" id="edit-index" value="">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">¿Cliente Abierto?</label>
+                        <select id="c-abierto" onchange="toggleClientFields()" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="SÍ">SÍ</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Nombre del Cliente</label>
+                        <input type="text" id="c-nombre" required placeholder="Ej. Mini Super Alex" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div id="wrapper-tipo-cierre" style="display: none;">
+                        <label class="block text-xs text-amber-400 mb-1 font-bold">Tipo Cierre (Si está cerrado)</label>
+                        <input type="text" id="c-tipo-cierre" placeholder="Ej. Solo esta visita / Vacaciones" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">Teléfono</label>
+                        <input type="tel" id="c-telefono" placeholder="Ej. 6641234567" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">¿Quién Recibe?</label>
+                        <input type="text" id="c-recibe" placeholder="Persona que atiende" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">Segmento de Cliente</label>
+                        <select id="c-segmento" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="Tipo A">Tipo A: Cobro, pasillos, refis y carnicería</option>
+                            <option value="Tipo B">Tipo B: Pasillos y refrigeradores</option>
+                            <option value="Tipo C">Tipo C: Solo exhibición básica</option>
+                            <option value="Tipo D">Tipo D: Fuera de ruta / Otro</option>
+                        </select>
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">Impacto de Prioridades</label>
+                        <select id="c-impacto" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="SÍ">SÍ</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-slate-400 mb-1">¿Compra Efectiva?</label>
+                        <select id="c-compra" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                            <option value="SÍ">SÍ</option>
+                            <option value="NO">NO</option>
+                        </select>
+                    </div>
+                    <div class="conditional-field">
+                        <label class="block text-xs text-amber-400 mb-1 font-bold">Motivo No Compra (Si aplica)</label>
+                        <input type="text" id="c-motivo-no-compra" placeholder="Ej. Inventario alto / Falta de liquidez" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">
+                    </div>
+                </div>
+
+                <div class="conditional-field grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Códigos sin Impactar / Comentarios</label>
+                        <textarea id="c-codigos" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200">Ninguno</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Notas de Auditoría</label>
+                        <textarea id="c-notas" rows="2" placeholder="Observaciones adicionales..." class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-200"></textarea>
+                    </div>
+                </div>
+
+                <!-- CAMARA NATIVA OBLIGATORIA -->
+                <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg">
+                    <label class="block text-xs text-amber-400 mb-1 font-bold">
+                        <i class="fa-solid fa-camera"></i> Foto de Fachada o Negocio (Abre Cámara Directa)
+                    </label>
+                    <input type="file" id="c-foto" accept="image/*" capture="environment" onchange="previewImage(event)" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                    <div id="foto-preview-container" class="mt-2 hidden">
+                        <img id="foto-preview" class="w-32 h-32 object-cover rounded border border-slate-600" alt="Vista previa">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center">
+                    <button type="button" id="cancel-edit-btn" onclick="cancelEdit()" class="hidden bg-slate-700 hover:bg-slate-600 text-white font-medium px-4 py-2 rounded-lg text-xs">Cancelar Edición</button>
+                    <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition flex items-center gap-2 text-sm ml-auto">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cliente en Reporte Ejecutivo
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 2: SUPERVISION -->
+        <div id="tab-supervision" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+            <h2 class="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list"></i> 3. Supervisión y Evaluación
+            </h2>
+            <div class="mb-6 p-4 bg-slate-900 border border-slate-700 rounded-lg">
+                <label class="block text-xs text-slate-400 mb-2 font-semibold uppercase">Seleccionar Cliente:</label>
+                <select id="supervision-client-select" class="w-full bg-slate-800 border border-slate-600 rounded p-2.5 text-sm text-slate-200">
+                    <option value="">-- Seleccione un cliente --</option>
+                </select>
+            </div>
+            <form id="supervision-form" onsubmit="submitSupervision(event)" class="space-y-4">
+                <div id="checklist-container" class="space-y-2"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-700 mt-4">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1 font-semibold">Firma Asesor</label>
+                        <canvas id="asesor-sig-pad" class="signature-pad w-full h-32"></canvas>
+                        <button type="button" onclick="clearSig('asesor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar</button>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1 font-semibold">Firma Supervisor</label>
+                        <canvas id="supervisor-sig-pad" class="signature-pad w-full h-32"></canvas>
+                        <button type="button" onclick="clearSig('supervisor-sig-pad')" class="mt-1 text-xs text-red-400 hover:underline">Borrar</button>
+                    </div>
+                </div>
+                <div class="pt-6 flex justify-end">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 rounded-lg shadow transition text-sm">Finalizar Supervisión</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 3: MAPA INTERACTIVO -->
+        <div id="tab-mapa" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl relative">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+                <div>
+                    <h2 class="text-lg font-semibold text-blue-400 flex items-center gap-2">
+                        <i class="fa-solid fa-map"></i> 4. Mapa Interactivo - Corrección de Pines de Clientes
+                    </h2>
+                    <p class="text-xs text-slate-400">Haz clic sobre el pin desfasado de un cliente registrado en el mapa para iniciar la corrección.</p>
+                </div>
+            </div>
+            
+            <div id="map-notice" class="bg-blue-950/80 border border-blue-500 text-blue-200 text-xs p-3 rounded-lg mb-3 flex items-center justify-between">
+                <span id="map-instruction-text"><i class="fa-solid fa-circle-info"></i> Haz clic en el pin del cliente que deseas modificar.</span>
+            </div>
+
+            <div id="map"></div>
+        </div>
+
+        <!-- TAB 4: HISTORIAL Y REPORTE GERENCIAL -->
+        <div id="tab-historial" class="tab-content hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl print-container">
+            <!-- Botones Superiores del Panel Gerencial -->
+            <div class="no-print flex flex-wrap gap-3 mb-6 bg-slate-900/80 p-3 rounded-xl border border-slate-700 items-center">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Imprimir Reporte / Evaluación y Firmas
+                </button>
+                <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> CSV Base de Datos
+                </button>
+                <button onclick="clearHistory()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow ml-auto flex items-center gap-2">
+                    <i class="fa-solid fa-trash"></i> Borrar Todo
+                </button>
+            </div>
+
+            <!-- 4 Tarjetas de Métricas Principales -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-slate-900 border-l-4 border-blue-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Visitas</p>
+                    <p id="metric-total" class="text-2xl font-black text-white mt-1">0</p>
+                </div>
+                <div class="bg-slate-900 border-l-4 border-emerald-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">% Clientes Abiertos</p>
+                    <p id="metric-abiertos" class="text-2xl font-black text-emerald-400 mt-1">0.0%</p>
+                </div>
+                <div class="bg-slate-900 border-l-4 border-amber-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">% Compra Efectiva</p>
+                    <p id="metric-compra" class="text-2xl font-black text-amber-400 mt-1">0.0%</p>
+                </div>
+                <div class="bg-slate-900 border-l-4 border-cyan-500 p-4 rounded-xl shadow">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">% Impacto Prioridades</p>
+                    <p id="metric-impacto" class="text-2xl font-black text-cyan-400 mt-1">0.0%</p>
+                </div>
+            </div>
+
+            <!-- Evaluación y Calificación del Asesor -->
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl shadow mb-6">
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-2"><i class="fa-solid fa-award"></i> Evaluación y Calificación del Asesor</h3>
+                <p id="eval-score" class="text-sm text-slate-300 font-medium mb-2">Promedio de Aciertos en Checklist: 0.0 / 10</p>
+                <div id="eval-status" class="bg-red-950/80 border border-red-600 text-red-300 text-xs font-bold px-3 py-2 rounded-lg mb-3 inline-block">
+                    Estatus de Desempeño: INEFICIENTE
+                </div>
+                <div class="mt-2 text-xs text-slate-400">
+                    <p class="font-bold text-amber-400 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Áreas donde requiere capacitación (Pasos con más fallos):</p>
+                    <ul id="eval-fallos-list" class="list-disc list-inside space-y-0.5 text-slate-300 pl-2">
+                        <li>Ningún fallo registrado aún.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Distribución de Clientes Segmentados -->
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl shadow mb-6">
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3"><i class="fa-solid fa-chart-column"></i> Distribución de Clientes Segmentados</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo A</p>
+                        <p id="seg-a" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo B</p>
+                        <p id="seg-b" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo C</p>
+                        <p id="seg-c" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <p class="text-xs text-slate-400 font-semibold">Tipo D</p>
+                        <p id="seg-d" class="text-xl font-bold text-white mt-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Clientes Registrados -->
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl shadow">
+                <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wide mb-3"><i class="fa-solid fa-list-check"></i> Registro Detallado de Clientes Visita</h3>
+                <div id="client-history-list" class="space-y-3">
+                    <p class="text-xs text-slate-500 italic">No hay clientes registrados en esta jornada.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- NAVEGACIÓN INFERIOR DE 4 BOTONES (BARRA FIJA EN LA PARTE INFERIOR) -->
+    <nav class="no-print fixed bottom-0 inset-x-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-700 z-50 py-2 px-4 shadow-2xl">
+        <div class="max-w-md mx-auto grid grid-cols-4 gap-1">
+            <button id="nav-btn-clientes" onclick="switchTab('tab-clientes')" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-blue-400 bg-slate-700/60 transition">
+                <i class="fa-solid fa-user-plus text-base mb-1"></i>
+                <span class="text-[10px] font-bold tracking-tight">Clientes</span>
             </button>
-            <button class="btn-report-action btn-performance" onclick="generatePerformanceReport()">
-                📋 2. Reporte Desempeño Asesor (PDF)
+
+            <button id="nav-btn-supervision" onclick="switchTab('tab-supervision')" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-clipboard-check text-base mb-1"></i>
+                <span class="text-[10px] font-bold tracking-tight">Supervisión</span>
             </button>
-            <button class="btn-report-action btn-executive" onclick="generateExecutiveReport()">
-                📊 3. Reporte Ejecutivo Global (PDF)
+
+            <button id="nav-btn-mapa" onclick="switchTab('tab-mapa')" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-map-location-dot text-base mb-1"></i>
+                <span class="text-[10px] font-bold tracking-tight">Mapa</span>
+            </button>
+
+            <button id="nav-btn-historial" onclick="switchTab('tab-historial')" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-chart-line text-base mb-1"></i>
+                <span class="text-[10px] font-bold tracking-tight">Reporte</span>
             </button>
         </div>
-    </div>
+    </nav>
 
-</div>
+    <!-- LÓGICA JAVASCRIPT INTEGRAL -->
+    <script>
+        // --- DATOS DE RUTAS POR CEDIS ---
+        const rutasCEDIS = {
+            TIJ: ["Ruta 101 - Tijuana Centro", "Ruta 102 - Otay", "Ruta 103 - La Presa"],
+            MXLI: ["Ruta 201 - Mexicali Palaco", "Ruta 202 - Mexicali Centro"],
+            HILLO: ["Ruta 301 - Hermosillo Norte", "Ruta 302 - Hermosillo Sur"],
+            MOC: ["Ruta 401 - Los Mochis Centro"],
+            CUL: ["Ruta 501 - Culiacán Poniente", "Ruta 502 - Culiacán Oriente"],
+            MZT: ["Ruta 601 - Mazatlán Zona Dorada"]
+        };
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    // --- 1. CONFIGURACIÓN DEL MAPA INTERACTIVO ---
-    const map = L.map('map').setView([19.4326, -99.1332], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-    }).addTo(map);
+        const pasosChecklist = [
+            "1. ID del cliente en base de datos",
+            "2. Saludo cordial y presentación",
+            "3. Presencia de nuestras marcas",
+            "4. Verificación de stock suficiente",
+            "5. Revisión de Caducidades (FIFO)",
+            "6. Impulso de nuevas variantes",
+            "7. Cierre de promociones vigentes",
+            "8. Resumen de venta comunicado",
+            "9. Correcto manejo de objeciones",
+            "10. Despedida y agradecimiento"
+        ];
 
-    // Clientes con colores asignados por ruta
-    const clientes = [
-        { id: 1, name: "Abarrotes El Punto", lat: 19.4350, lng: -99.1350, ruta: "Norte", color: "#3b82f6" },
-        { id: 2, name: "Minisuper Don Juan", lat: 19.4300, lng: -99.1300, ruta: "Sur", color: "#10b981" },
-        { id: 3, name: "Farmacia La Salud", lat: 19.4380, lng: -99.1400, ruta: "Este", color: "#f59e0b" }
-    ];
+        let state = {
+            cedis: "",
+            ruta: "",
+            asesor: "",
+            tipoRuta: "Ruta Activa",
+            objetivo: "",
+            clientes: [],
+            evaluaciones: {}
+        };
 
-    clientes.forEach(c => {
-        // Marcador con pin coloreado y etiqueta flotante con el nombre del cliente
-        const pinIcon = L.divIcon({
-            className: 'custom-pin-container',
-            html: `
-                <div style="background-color:${c.color}; width:18px; height:18px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>
-                <div class="custom-pin-label" style="position:absolute; left:22px; top:-2px;">${c.name} (${c.ruta})</div>
-            `,
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
+        let map = null;
+        let mapMarkers = [];
+
+        // --- INICIALIZACIÓN ---
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            initChecklist();
+            initMap();
+            updateMetrics();
         });
 
-        const marker = L.marker([c.lat, c.lng], { draggable: true, icon: pinIcon }).addTo(map);
-        
-        marker.on('dragend', function() {
-            const pos = marker.getLatLng();
-            c.lat = pos.lat;
-            c.lng = pos.lng;
-        });
-    });
+        // --- NAVEGACIÓN ENTRE PESTAÑAS (4 BOTONES INFERIORES) ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
 
-    // --- 2. CHECKLIST DE 10 PASOS (SELECCIÓN DIRECTA SI / NO) ---
-    const pasos = [
-        "1. ID cliente en base de datos",
-        "2. Saludo al cliente",
-        "3. ID nuestras marcas",
-        "4. ID stock suficiente",
-        "5. Caducidades (FIFO)",
-        "6. Impulso de variantes",
-        "7. Cierre promos",
-        "8. Comunicar venta a cliente",
-        "9. Manejo de objeciones",
-        "10. Despedida"
-    ];
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-400', 'bg-slate-700/60');
+                btn.classList.add('text-slate-400');
+            });
 
-    const gridContainer = document.getElementById('checklist-grid');
-    const checklistValores = {};
+            const activeBtnId = tabId.replace('tab-', 'nav-btn-');
+            const activeBtn = document.getElementById(activeBtnId);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-400');
+                activeBtn.classList.add('text-blue-400', 'bg-slate-700/60');
+            }
 
-    pasos.forEach((paso, idx) => {
-        checklistValores[idx] = "SI"; // Valor por defecto
-
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'step-item';
-        itemDiv.innerHTML = `
-            <span class="step-label">${paso}</span>
-            <div class="btn-toggle-group">
-                <button class="btn-toggle active-si" id="btn-si-${idx}" onclick="selectOption(${idx}, 'SI')">SI</button>
-                <button class="btn-toggle" id="btn-no-${idx}" onclick="selectOption(${idx}, 'NO')">NO</button>
-            </div>
-        `;
-        gridContainer.appendChild(itemDiv);
-    });
-
-    function selectOption(idx, val) {
-        checklistValores[idx] = val;
-        const btnSi = document.getElementById(`btn-si-${idx}`);
-        const btnNo = document.getElementById(`btn-no-${idx}`);
-
-        if (val === 'SI') {
-            btnSi.className = 'btn-toggle active-si';
-            btnNo.className = 'btn-toggle';
-        } else {
-            btnSi.className = 'btn-toggle';
-            btnNo.className = 'btn-toggle active-no';
-        }
-    }
-
-    // --- 3. CONFIGURACIÓN DE CANVAS DE FIRMAS ---
-    function initCanvas(id) {
-        const canvas = document.getElementById(id);
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
-
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth - 24;
-            canvas.height = 110;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        function start(e) {
-            drawing = true;
-            draw(e);
-        }
-        function stop() {
-            drawing = false;
-            ctx.beginPath();
-        }
-        function draw(e) {
-            if (!drawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#00b4d8';
-
-            ctx.lineTo(clientX - rect.left, clientY - rect.top);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(clientX - rect.left, clientY - rect.top);
+            if (tabId === 'tab-mapa' && map) {
+                setTimeout(() => map.invalidateSize(), 200);
+            }
         }
 
-        canvas.addEventListener('mousedown', start);
-        canvas.addEventListener('mouseup', stop);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchstart', start);
-        canvas.addEventListener('touchend', stop);
-        canvas.addEventListener('touchmove', draw);
-    }
+        function toggleRescuePanel() {
+            document.getElementById('rescue-panel').classList.toggle('hidden');
+        }
 
-    initCanvas('sig-asesor');
-    initCanvas('sig-supervisor');
+        // --- MANEJO DE RUTAS Y CEDIS ---
+        function onCedisChange() {
+            const cedis = document.getElementById('f-cedis').value;
+            const rutaSelect = document.getElementById('f-ruta');
+            rutaSelect.innerHTML = '<option value="">Seleccione Ruta</option>';
+            if (rutasCEDIS[cedis]) {
+                rutasCEDIS[cedis].forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r;
+                    opt.textContent = r;
+                    rutaSelect.appendChild(opt);
+                });
+            }
+            saveRouteData();
+        }
 
-    function clearCanvas(id) {
-        const canvas = document.getElementById(id);
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
+        function saveRouteData() {
+            state.cedis = document.getElementById('f-cedis').value;
+            state.ruta = document.getElementById('f-ruta').value;
+            state.asesor = document.getElementById('f-asesor').value;
+            state.tipoRuta = document.getElementById('f-tipo-ruta').value;
+            state.objetivo = document.getElementById('f-objetivo').value;
+            localStorage.setItem('intmex_state', JSON.stringify(state));
+        }
 
-    // --- 4. FUNCIONALIDADES DE LOS 3 REPORTES ---
+        function loadState() {
+            const saved = localStorage.getItem('intmex_state');
+            if (saved) {
+                state = JSON.parse(saved);
+                document.getElementById('f-cedis').value = state.cedis || "";
+                onCedisChange();
+                document.getElementById('f-ruta').value = state.ruta || "";
+                document.getElementById('f-asesor').value = state.asesor || "";
+                document.getElementById('f-tipo-ruta').value = state.tipoRuta || "Ruta Activa";
+                document.getElementById('f-objetivo').value = state.objetivo || "";
+            }
+        }
 
-    // Reporte 1: Base de datos limpia para My Maps
-    function downloadMyMapsCSV() {
-        let csv = "Name,Latitude,Longitude,Route,Color\n";
-        clientes.forEach(c => {
-            csv += `"${c.name}",${c.lat},${c.lng},"${c.ruta}","${c.color}"\n`;
-        });
+        // --- REGISTRO DE CLIENTES ---
+        function toggleClientFields() {
+            const abierto = document.getElementById('c-abierto').value;
+            const wrapperCierre = document.getElementById('wrapper-tipo-cierre');
+            const condFields = document.querySelectorAll('.conditional-field');
+            if (abierto === 'NO') {
+                wrapperCierre.style.display = 'block';
+                condFields.forEach(f => f.style.display = 'none');
+            } else {
+                wrapperCierre.style.display = 'none';
+                condFields.forEach(f => f.style.display = 'block');
+            }
+        }
 
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", "MyMaps_Base_Datos_INTMEX.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+        let photoBase64 = "";
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoBase64 = e.target.result;
+                    document.getElementById('foto-preview').src = photoBase64;
+                    document.getElementById('foto-preview-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
 
-    // Reporte 2: Desempeño individual con Firmas
-    function generatePerformanceReport() {
-        window.print();
-    }
+        function registerClient(e) {
+            e.preventDefault();
+            const editIndex = document.getElementById('edit-index').value;
+            const clientData = {
+                id: editIndex !== "" ? state.clientes[editIndex].id : Date.now(),
+                abierto: document.getElementById('c-abierto').value,
+                nombre: document.getElementById('c-nombre').value,
+                tipoCierre: document.getElementById('c-tipo-cierre').value,
+                telefono: document.getElementById('c-telefono').value,
+                recibe: document.getElementById('c-recibe').value,
+                segmento: document.getElementById('c-segmento').value,
+                impacto: document.getElementById('c-impacto').value,
+                compra: document.getElementById('c-compra').value,
+                motivoNoCompra: document.getElementById('c-motivo-no-compra').value,
+                codigos: document.getElementById('c-codigos').value,
+                notas: document.getElementById('c-notas').value,
+                foto: photoBase64 || (editIndex !== "" ? state.clientes[editIndex].foto : ""),
+                lat: 19.4326 + (Math.random() - 0.5) * 0.02,
+                lng: -99.1332 + (Math.random() - 0.5) * 0.02
+            };
 
-    // Reporte 3: Reporte Ejecutivo Global
-    function generateExecutiveReport() {
-        alert("SUPERVISION INTMEX: Generando Reporte Ejecutivo Global con estadísticas de cumplimiento e historial general de rutas.");
-        window.print();
-    }
-</script>
+            if (editIndex !== "") {
+                state.clientes[editIndex] = clientData;
+                document.getElementById('edit-index').value = "";
+            } else {
+                state.clientes.push(clientData);
+            }
 
+            saveRouteData();
+            document.getElementById('client-form').reset();
+            document.getElementById('foto-preview-container').classList.add('hidden');
+            photoBase64 = "";
+            updateMetrics();
+            updateSupervisionSelect();
+            renderMapMarkers();
+            alert("Cliente registrado exitosamente.");
+        }
+
+        // --- CHECKLIST Y SUPERVISIÓN ---
+        function initChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = "";
+            pasosChecklist.forEach((paso, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center bg-slate-900 p-2.5 rounded border border-slate-700 text-xs";
+                row.innerHTML = `
+                    <span>${paso}</span>
+                    <select id="step-${idx}" class="bg-slate-800 border border-slate-600 rounded p-1 text-slate-200">
+                        <option value="1">CUMPLE (1)</option>
+                        <option value="0">NO CUMPLE (0)</option>
+                    </select>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateSupervisionSelect() {
+            const select = document.getElementById('supervision-client-select');
+            select.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
+            state.clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nombre;
+                select.appendChild(opt);
+            });
+        }
+
+        function submitSupervision(e) {
+            e.preventDefault();
+            const clientId = document.getElementById('supervision-client-select').value;
+            if (!clientId) {
+                alert("Seleccione un cliente para evaluar.");
+                return;
+            }
+
+            let score = 0;
+            let fallos = [];
+            pasosChecklist.forEach((paso, idx) => {
+                const val = parseInt(document.getElementById(`step-${idx}`).value);
+                score += val;
+                if (val === 0) fallos.push(paso);
+            });
+
+            state.evaluaciones[clientId] = { score, fallos };
+            saveRouteData();
+            updateMetrics();
+            alert("Evaluación guardada exitosamente.");
+        }
+
+        // --- MAPA LEAFLET ---
+        function initMap() {
+            map = L.map('map').setView([19.4326, -99.1332], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© SUPERVISION INTMEX'
+            }).addTo(map);
+            renderMapMarkers();
+        }
+
+        function renderMapMarkers() {
+            if (!map) return;
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+
+            state.clientes.forEach(c => {
+                const marker = L.marker([c.lat, c.lng], { draggable: true }).addTo(map);
+                marker.bindPopup(`<b>${c.nombre}</b><br>Estatus: ${c.abierto === 'SÍ' ? 'Abierto' : 'Cerrado'}`);
+                marker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    c.lat = pos.lat;
+                    c.lng = pos.lng;
+                    saveRouteData();
+                });
+                mapMarkers.push(marker);
+            });
+        }
+
+        // --- MÉTRICAS Y REPORTES ---
+        function updateMetrics() {
+            const total = state.clientes.length;
+            document.getElementById('metric-total').textContent = total;
+
+            if (total === 0) {
+                document.getElementById('metric-abiertos').textContent = "0.0%";
+                document.getElementById('metric-compra').textContent = "0.0%";
+                document.getElementById('metric-impacto').textContent = "0.0%";
+                return;
+            }
+
+            const abiertos = state.clientes.filter(c => c.abierto === 'SÍ').length;
+            const compra = state.clientes.filter(c => c.compra === 'SÍ').length;
+            const impacto = state.clientes.filter(c => c.impacto === 'SÍ').length;
+
+            document.getElementById('metric-abiertos').textContent = ((abiertos / total) * 100).toFixed(1) + "%";
+            document.getElementById('metric-compra').textContent = ((compra / total) * 100).toFixed(1) + "%";
+            document.getElementById('metric-impacto').textContent = ((impacto / total) * 100).toFixed(1) + "%";
+
+            // Segmentos
+            document.getElementById('seg-a').textContent = state.clientes.filter(c => c.segmento === 'Tipo A').length;
+            document.getElementById('seg-b').textContent = state.clientes.filter(c => c.segmento === 'Tipo B').length;
+            document.getElementById('seg-c').textContent = state.clientes.filter(c => c.segmento === 'Tipo C').length;
+            document.getElementById('seg-d').textContent = state.clientes.filter(c => c.segmento === 'Tipo D').length;
+
+            // Render lista en historial
+            const list = document.getElementById('client-history-list');
+            list.innerHTML = "";
+            state.clientes.forEach(c => {
+                const div = document.createElement('div');
+                div.className = "bg-slate-800 p-3 rounded-lg border border-slate-700 text-xs flex justify-between items-center";
+                div.innerHTML = `
+                    <div>
+                        <p class="font-bold text-blue-300 text-sm">${c.nombre}</p>
+                        <p class="text-slate-400">Tel: ${c.telefono || 'N/A'} | Recibe: ${c.recibe || 'N/A'} | Segmento: ${c.segmento}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded text-xs font-bold ${c.abierto === 'SÍ' ? 'bg-emerald-950 text-emerald-400 border border-emerald-600' : 'bg-red-950 text-red-400 border border-red-600'}">
+                        ${c.abierto === 'SÍ' ? 'ABIERTO' : 'CERRADO'}
+                    </span>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function clearSig(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function exportCSV() {
+            let csv = "ID,Nombre,Abierto,Telefono,Recibe,Segmento,Impacto,Compra,Lat,Lng\n";
+            state.clientes.forEach(c => {
+                csv += `"${c.id}","${c.nombre}","${c.abierto}","${c.telefono}","${c.recibe}","${c.segmento}","${c.impacto}","${c.compra}",${c.lat},${c.lng}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Reporte_INTMEX_${Date.now()}.csv`;
+            a.click();
+        }
+
+        function clearHistory() {
+            if (confirm("¿Está seguro de borrar todos los datos de esta jornada?")) {
+                state.clientes = [];
+                state.evaluaciones = {};
+                saveRouteData();
+                updateMetrics();
+                renderMapMarkers();
+            }
+        }
+
+        function exportBackup() {
+            const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Respaldo_INTMEX_${Date.now()}.json`;
+            a.click();
+        }
+
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    state = JSON.parse(evt.target.result);
+                    saveRouteData();
+                    location.reload();
+                };
+                reader.readAsText(file);
+            }
+        }
+    </script>
 </body>
 </html>
